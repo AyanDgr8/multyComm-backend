@@ -1,7 +1,7 @@
 // src/routes/router.js
 
 import { Router } from 'express';
-import { UserDetailsBookform } from '../models/bodyPart.js';
+import { UserDetailsBookform } from '../models/multyForm.js';
 // import { validateInput } from '../middlewares/validationMiddleware.js';
 
 
