@@ -109,4 +109,26 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
   }
 });
 
+
+// Refresh token route
+router.post('/refresh-token', async (req, res) => {
+  try {
+    const refreshToken = req.body.token;
+    if (refreshToken == null) return res.sendStatus(401);
+    // Check if the refresh token is valid
+    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+    
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err) return res.sendStatus(403);
+      // If verification is successful, generate a new access token
+      const accessToken = generateAccessToken({ name: user.name });
+      // Send the new access token to the client
+      res.json({ accessToken: accessToken });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
