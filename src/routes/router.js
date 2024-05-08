@@ -9,19 +9,6 @@ import { UserLoginDetailsForm } from '../models/login.js';
 
 const router = Router();
 
-// Common function to handle saving user details
-const saveUserDetails = async (req, res, UserDetailsModel) => {
-  try {
-    const user = new UserDetailsModel(req.body);
-    const savedUser = await user.save();
-    console.log('User details saved successfully:', savedUser);
-    res.json(savedUser);
-  } catch (error) {
-    console.error('Error saving user details:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
 // Endpoint for registration 
 router.post('/user-basic-details-bookform', async (req, res) => {
   try {
