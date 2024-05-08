@@ -35,7 +35,7 @@ const generateRefreshToken = () => {
 // Endpoint for registration
 router.post('/user-register', async (req, res) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, password, firstname, lastname, email, phone } = req.body;
 
     // Check if the user already exists
     const existingUser = await Users.findOne({ email });
@@ -50,7 +50,10 @@ router.post('/user-register', async (req, res) => {
     const newUser = new Users({
       username,
       password: hashedPassword,
+      firstname,
+      lastname,
       email,
+      phone,
     });
 
     await newUser.save();
