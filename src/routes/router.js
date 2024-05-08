@@ -10,7 +10,7 @@ import { UserLoginDetailsForm } from '../models/login.js';
 const router = Router();
 
 // Endpoint for registration 
-router.post('/user-basic-details-bookform', async (req, res) => {
+router.post('/user-register-details-bookform', async (req, res) => {
   try {
     const { username, password, firstName, lastName, phone, email } = req.body;
 
