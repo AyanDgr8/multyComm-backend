@@ -62,8 +62,6 @@ router.post('/user-basic-details-bookform', async (req, res) => {
 
 // *****************
 
-
-
 // Endpoint for login
 router.post('/user-login-details-bookform', async (req, res) => {
   try {
@@ -120,31 +118,5 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
 
 
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-// import { UserDetailsBookform } from '../models/multyForm.js';
-
-
-// // Endpoint for user details from bookform
-// router.post('/user-details-bookform', async (req, res) => {
-//   await saveUserDetails(req, res, UserDetailsBookform);
-// });
-
-
-
-
-
-
-
 
 
