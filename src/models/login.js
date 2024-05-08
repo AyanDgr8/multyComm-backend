@@ -1,33 +1,33 @@
-// src/models/login.js
+// // src/models/login.js
 
 
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 
 
-const loginSchema = new mongoose.Schema({
+// const loginSchema = new mongoose.Schema({
     
     
-    username: {
-        type: String,
+//     username: {
+//         type: String,
       
-    },
+//     },
     
 
-    password:{
-        type: String,
+//     password:{
+//         type: String,
         
-    },
+//     },
 
-    phone: { 
-        type: Number, 
+//     phone: { 
+//         type: Number, 
        
-    },
+//     },
 
-    email: { 
-        type: String, 
-    },
-});
+//     email: { 
+//         type: String, 
+//     },
+// });
 
-const UserLoginDetailsForm = mongoose.model("UserLoginDetailsForm", loginSchema);
+// const UserLoginDetailsForm = mongoose.model("UserLoginDetailsForm", loginSchema);
 
-export { UserLoginDetailsForm };
+// export { UserLoginDetailsForm };

@@ -5,8 +5,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-import { UserRegisterDetailsForm } from '../models/register.js';
-import { UserLoginDetailsForm } from '../models/login.js';
 
 const router = Router();
 
@@ -16,7 +14,7 @@ router.post('/user-register-details-bookform', async (req, res) => {
     const { username, password, email } = req.body;
 
     // Check if the user already exists
-    const existingUser = await UserRegisterDetailsForm.findOne({ email });
+    const existingUser = await Users.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
@@ -25,7 +23,7 @@ router.post('/user-register-details-bookform', async (req, res) => {
     // Hash the password before saving it
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new UserRegisterDetailsForm({
+    const newUser = new Users({
       username,
       password: hashedPassword,
       email,
@@ -64,7 +62,7 @@ router.post('/user-login-details-bookform', async (req, res) => {
     const { email, password } = req.body;
 
     // Check if the user exists
-    const user = await UserLoginDetailsForm.findOne({ email });
+    const user = await Users.findOne({ email });
 
     if (!user) {
       return res.status(401).json({ message: 'Authentication failed' });
@@ -97,8 +95,7 @@ router.post('/user-login-details-bookform', async (req, res) => {
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
   try {
-
-    const userData = await UserDataModel.findById(req.userId);
+    const userData = await Users.findById(req.userId);
     if (userData) {
       res.json({ message: 'User data retrieved successfully', data: userData });
     } else {
@@ -109,6 +106,5 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 export default router;
