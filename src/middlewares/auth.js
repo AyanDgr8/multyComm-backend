@@ -14,8 +14,8 @@ const authMiddleware = (req, res, next) => {
         const userInfo = jwt.verify(token, process.env.JWT_SECRET);
         
         // Attach user ID and username to the request object for further processing
-        req.userId = userInfo.id;
-        req.userName = userInfo.name;
+        req.userId = userInfo.userId;
+        req.userName = userInfo.username;
         
         // Proceed to the next middleware or route handler
         next(); 
@@ -28,4 +28,4 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-export { authMiddleware } ;
+export { authMiddleware };
