@@ -1,4 +1,4 @@
-// index.js
+// src/index.js
 
 // require('dotenv').config({path: './env'})
 

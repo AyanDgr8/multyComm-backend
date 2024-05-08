@@ -1,10 +1,10 @@
-// src/models/register.js
+// src/models/login.js
 
 
 import mongoose from 'mongoose';
 
 
-const registerSchema = new mongoose.Schema({
+const loginSchema = new mongoose.Schema({
     
     
     username: {
@@ -19,16 +19,6 @@ const registerSchema = new mongoose.Schema({
     password:{
         type: String,
         required: [true, "Password is required"],
-    },
-
-    firstName: { 
-        type: String, 
-        required: [true, "Please enter your First Name"] 
-    },
-
-    lastName: { 
-        type: String, 
-        required: [true, "Please enter your Last Name"] 
     },
 
     phone: { 
@@ -46,6 +36,6 @@ const registerSchema = new mongoose.Schema({
     },
 });
 
-const UserRegisterDetailsForm = mongoose.model("UserRegisterDetailsForm", registerSchema);
+const UserLoginDetailsForm = mongoose.model("UserLoginDetailsForm", loginSchema);
 
-export { UserRegisterDetailsForm };
+export { UserLoginDetailsForm };
