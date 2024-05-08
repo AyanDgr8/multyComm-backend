@@ -54,10 +54,16 @@ router.post('/user-register-details-bookform', async (req, res) => {
       userId: newUser._id,
     });
   } catch (error) {
+    // Check for duplicate key error
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
+      return res.status(400).json({ message: 'Email address already in use' });
+    }
+
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 
