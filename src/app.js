@@ -17,8 +17,6 @@ app.use("/", router);
 
 
 
-
-
 // Middleware for handling 404 errors
 app.use(notFoundHandler);
 

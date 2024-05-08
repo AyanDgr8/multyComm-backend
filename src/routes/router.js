@@ -1,15 +1,39 @@
 // src/routes/router.js
 
+
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 
 const router = Router();
 
-// Endpoint for registration 
-router.post('/user-register-details-bookform', async (req, res) => {
+// Secret key for JWT signing
+const JWT_SECRET = process.env.JWT_SECRET;
+
+
+// Secret key for refresh token signing
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET ;
+
+
+// To generate access token
+const generateAccessToken = (userId, email) => {
+  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '15m' });
+};
+
+
+
+// To generate refresh token
+const generateRefreshToken = () => {
+  return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
+};
+
+
+// ***************************
+
+
+// Endpoint for registration
+router.post('/user-register', async (req, res) => {
   try {
     const { username, password, email } = req.body;
 
@@ -31,33 +55,30 @@ router.post('/user-register-details-bookform', async (req, res) => {
 
     await newUser.save();
 
-    // Create a JWT token for the registered user
-    const token = jwt.sign(
-      { 
-        userId: newUser._id,
-        email: newUser.email,
-      },
-      process.env.JWT_SECRET
-    );
+    // Create a JWT token and refresh token for the registered user
+    const accessToken = generateAccessToken(newUser._id, newUser.email);
+    const refreshToken = generateRefreshToken();
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'User registered successfully',
-      token,
+      accessToken,
+      refreshToken,
       userId: newUser._id,
     });
   } catch (error) {
-    // Check for duplicate key error
-    if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
-      return res.status(400).json({ message: 'Email address already in use' });
-    }
-
+    // Handle errors
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
+
+// ***************************
+
+
+
 // Endpoint for login
-router.post('/user-login-details-bookform', async (req, res) => {
+router.post('/user-login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -75,22 +96,24 @@ router.post('/user-login-details-bookform', async (req, res) => {
       return res.status(401).json({ message: 'Authentication failed' });
     }
 
-    // Create a JWT token for the authenticated user with expiration time
-    const token = jwt.sign(
-      { 
-        userId: user._id,
-        email: user.email,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' } // Token expires in 1 hour
-    );
+    // Create a JWT token and refresh token for the authenticated user
+    const accessToken = generateAccessToken(user._id, user.email);
+    const refreshToken = generateRefreshToken();
 
-    res.status(200).json({ token, userId: user._id });
+    res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
+    // Handle errors
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+
+
+
+// ***************************
+
+
 
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
@@ -102,9 +125,29 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
       res.status(404).json({ message: 'User data not found' });
     }
   } catch (error) {
+    // Handle errors
     console.error('Error retrieving user data:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+
+// ***************************
+
+
+
+// Middleware to authenticate access token
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.userId = user.userId;
+    next();
+  });
+}
 
 export default router;
