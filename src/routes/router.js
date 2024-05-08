@@ -9,11 +9,11 @@ import { Users } from '../models/users.js';
 const router = Router();
 
 // Secret key for JWT signing
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
 
 
 // Secret key for refresh token signing
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET ;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret';
 
 
 // To generate access token

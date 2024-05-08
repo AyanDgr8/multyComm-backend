@@ -1,5 +1,6 @@
 // src/middlewares/auth.js
 
+
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
@@ -8,10 +9,15 @@ dotenv.config();
 const authMiddleware = (req, res, next) => {
     try {
         // Extract the JWT token from the Authorization header
-        const token = req.headers.authorization.split(' ')[1];
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            throw new Error('Authorization header is missing');
+        }
+
+        const accessToken = authHeader.split(' ')[1];
         
-        // Verify the JWT token using the secret key
-        const userInfo = jwt.verify(token, process.env.JWT_SECRET);
+        // Verify the access token using the JWT_SECRET
+        const userInfo = jwt.verify(accessToken, process.env.JWT_SECRET);
         
         // Attach user ID and username to the request object for further processing
         req.userId = userInfo.userId;
