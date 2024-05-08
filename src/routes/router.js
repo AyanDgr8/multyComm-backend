@@ -39,6 +39,7 @@ router.post('/user-register-details-bookform', async (req, res) => {
     const token = jwt.sign(
       { 
         userId: newUser._id,
+        username: newUser.username,
         email: newUser.email,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
