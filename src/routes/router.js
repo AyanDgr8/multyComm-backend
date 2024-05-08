@@ -12,7 +12,7 @@ const router = Router();
 // Endpoint for registration 
 router.post('/user-register-details-bookform', async (req, res) => {
   try {
-    const { username, password, firstName, lastName, phone, email } = req.body;
+    const { username, password, email } = req.body;
 
     // Check if the user already exists
     const existingUser = await UserRegisterDetailsForm.findOne({ email });
@@ -27,9 +27,6 @@ router.post('/user-register-details-bookform', async (req, res) => {
     const newUser = new UserRegisterDetailsForm({
       username,
       password: hashedPassword,
-      firstName,
-      lastName,
-      phone,
       email,
     });
 
@@ -39,11 +36,7 @@ router.post('/user-register-details-bookform', async (req, res) => {
     const token = jwt.sign(
       { 
         userId: newUser._id,
-        username: newUser.username,
         email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        phone: newUser.phone
       },
       process.env.JWT_SECRET
     );
@@ -63,11 +56,6 @@ router.post('/user-register-details-bookform', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-
-
-
-// *****************
 
 // Endpoint for login
 router.post('/user-login-details-bookform', async (req, res) => {
@@ -93,7 +81,6 @@ router.post('/user-login-details-bookform', async (req, res) => {
       { 
         userId: user._id,
         email: user.email,
-        username: user.username,
       },
       process.env.JWT_SECRET,
       { expiresIn: '1h' } // Token expires in 1 hour
@@ -106,8 +93,7 @@ router.post('/user-login-details-bookform', async (req, res) => {
   }
 });
 
-
-//  JWT authorization
+// JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
   try {
 
@@ -123,7 +109,4 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
   }
 });
 
-
 export default router;
-
-
