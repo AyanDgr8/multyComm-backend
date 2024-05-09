@@ -89,14 +89,13 @@ router.post('/user-register', async (req, res) => {
 // ***************************
 
 
-
 // Endpoint for login
 router.post('/user-login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body; // Change 'email' to 'username'
 
     // Check if the user exists
-    const user = await Users.findOne({ email });
+    const user = await Users.findOne({ username }); // Change 'email' to 'username'
 
     if (!user) {
       return res.status(401).json({ message: 'Authentication failed' });
@@ -120,6 +119,7 @@ router.post('/user-login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 
