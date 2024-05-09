@@ -42,13 +42,15 @@ router.post('/user-register', async (req, res) => {
 
     if (existingUser) {
       let message = '';
-      if (existingUser.email === email) {
-        message = 'Email is already in use';
-      } else if (existingUser.phone === phone) {
-        message = 'Phone number is already in use';
-      } else {
+      if(existingUser.username === username){
         message = 'Username is already in use';
-      }
+      } 
+      else if (existingUser.email === email) {
+        message = 'Email is already in use';
+      } 
+      else  {
+        message = 'Phone number is already in use';
+      } 
       return res.status(400).json({ message });
     }
 
