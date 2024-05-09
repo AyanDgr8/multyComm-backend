@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema({
     email: { 
         type: String, 
     },
+
+    dob: {
+        dob: String,
+    },
+
+    gender: {
+        type: String,
+    },
 });
 
 const Users = mongoose.model('Users', userSchema);

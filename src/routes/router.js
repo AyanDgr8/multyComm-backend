@@ -35,7 +35,7 @@ const generateRefreshToken = () => {
 // Endpoint for registration
 router.post('/user-register', async (req, res) => {
   try {
-    const { username, password, firstName, lastName, email, phone } = req.body;
+    const { username, password, firstName, lastName, email, phone, dob, gender } = req.body;
 
     // Check if the user already exists
     const existingUser = await Users.findOne({ $or: [{ email }, { phone }, { username }] });
@@ -64,6 +64,8 @@ router.post('/user-register', async (req, res) => {
       lastName,
       email,
       phone,
+      dob,
+      gender,
     });
 
     await newUser.save();
@@ -92,10 +94,10 @@ router.post('/user-register', async (req, res) => {
 // Endpoint for login
 router.post('/user-login', async (req, res) => {
   try {
-    const { username, password } = req.body; // Change 'email' to 'username'
+    const { username, password } = req.body; 
 
     // Check if the user exists
-    const user = await Users.findOne({ username }); // Change 'email' to 'username'
+    const user = await Users.findOne({ username }); 
 
     if (!user) {
       return res.status(401).json({ message: 'Authentication failed' });
