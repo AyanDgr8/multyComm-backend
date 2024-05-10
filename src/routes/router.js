@@ -122,13 +122,35 @@ router.post('/user-login', async (req, res) => {
   }
 });
 
+// ***********************
 
+// Define the route to fetch user data
+router.get('/user-data', async (req, res) => {
+  try {
+    // Assuming you have some way to authenticate the user (e.g., using JWT)
+    // Get the user ID from the request
+    const userId = req.userId;
+
+    // Find the user by ID in the database
+    const user = await Users.findById(userId);
+
+    // If user not found, return an error
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // If user found, return the user data
+    res.status(200).json(user);
+  } catch (error) {
+    // Handle errors
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 
 // ***************************
-
-
 
 
 // Endpoint for forgot password
