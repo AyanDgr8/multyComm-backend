@@ -1,6 +1,5 @@
 // src/routes/router.js
 
-
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -12,26 +11,20 @@ const router = Router();
 // Secret key for JWT signing
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
 
-
 // Secret key for refresh token signing
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret';
-
 
 // To generate access token
 const generateAccessToken = (userId, email) => {
   return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '15m' });
 };
 
-
-
 // To generate refresh token
 const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
 
-
 // ***************************
-
 
 // Endpoint for registration
 router.post('/user-register', async (req, res) => {
@@ -88,9 +81,7 @@ router.post('/user-register', async (req, res) => {
   }
 });
 
-
 // ***************************
-
 
 // Endpoint for login
 router.post('/user-login', async (req, res) => {
@@ -123,8 +114,7 @@ router.post('/user-login', async (req, res) => {
   }
 });
 
-// ***********************
-
+// ***************************
 
 // Define the route to fetch user data
 router.get('/user-data', authMiddleware, async (req, res) => {
@@ -149,11 +139,7 @@ router.get('/user-data', authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
 // ***************************
-
 
 // Endpoint for forgot password
 router.post('/forgot-password', async (req, res) => {
@@ -207,7 +193,6 @@ router.post('/verify-otp', async (req, res) => {
 
 // ***************************
 
-
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
   try {
@@ -224,23 +209,6 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
   }
 });
 
-
 // ***************************
-
-
-
-// Middleware to authenticate access token
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.userId = user.userId;
-    next();
-  });
-}
 
 export default router;
