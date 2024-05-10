@@ -1,11 +1,9 @@
-// src/models/users.js
-
-
+// src/models/paidUser.js
 
 import mongoose from 'mongoose';
 
+const paidSchema = new mongoose.Schema(
 
-const userSchema = new mongoose.Schema(
     {
         username: {
             type: String,
@@ -38,12 +36,25 @@ const userSchema = new mongoose.Schema(
         gender: {
             type: String,
         },
+
+        address: {
+            street: String,
+            city: String,
+            state: String,
+            zip: Number,
+        },
+
+        createdBy:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Users"
+        }
+
     },
     {
-        timestamps:true
+        timestamps: true,
     }
 );
 
-const Users = mongoose.model('Users', userSchema);
+const PaidUsers = mongoose.model('PaidUsers', paidSchema);
 
-export { Users };
+export { PaidUsers };
