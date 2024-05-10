@@ -4,6 +4,7 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 
 const router = Router();
@@ -124,11 +125,11 @@ router.post('/user-login', async (req, res) => {
 
 // ***********************
 
+
 // Define the route to fetch user data
-router.get('/user-data', async (req, res) => {
+router.get('/user-data', authMiddleware, async (req, res) => {
   try {
-    // Assuming you have some way to authenticate the user (e.g., using JWT)
-    // Get the user ID from the request
+    // The user ID is already attached to the request object by the authMiddleware
     const userId = req.userId;
 
     // Find the user by ID in the database
@@ -147,6 +148,7 @@ router.get('/user-data', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 
