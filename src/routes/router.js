@@ -130,6 +130,60 @@ router.post('/user-login', async (req, res) => {
 
 
 
+
+// Endpoint for forgot password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+    // Check if either email or phone exists
+    const user = await Users.findOne({ $or: [{ email }, { phone }] });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Generate and send OTP (implementation depends on your chosen OTP service provider)
+    // Once the OTP is sent, you can store it in the database against the user
+    const otp = generateOTP(); // Example function to generate OTP
+    user.otp = otp;
+    await user.save();
+    // Send OTP to user (implementation depends on your chosen OTP service provider)
+    sendOTP(user.email, user.phone, otp); // Example function to send OTP
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ***************************
+
+// Endpoint for verifying OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, phone, otp } = req.body;
+    // Check if either email or phone exists
+    const user = await Users.findOne({ $or: [{ email }, { phone }] });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Check if OTP matches
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    // Clear OTP and generate new access and refresh tokens
+    user.otp = '';
+    await user.save();
+    const accessToken = generateAccessToken(user._id, user.email);
+    const refreshToken = generateRefreshToken();
+    res.status(200).json({ accessToken, refreshToken, userId: user._id });
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ***************************
+
+
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
   try {
