@@ -16,7 +16,7 @@ const server = app.listen(process.env.PORT, () => {
   console.log(`⚙️  Server is running at port : ${process.env.PORT}`.cyan.bold);
 });
 
-process.title = 'Registration Form';
+process.title = 'MultyComm Form';
 
 const gracefulShutdown = async () => {
   console.log('📢 Received shutdown signal, closing server and database connections...'.yellow.bold);
@@ -39,3 +39,5 @@ connectDB()
     console.log("MongoDB connection failed !!! ".red.bold, err);
     process.exit(1);
   });
+
+

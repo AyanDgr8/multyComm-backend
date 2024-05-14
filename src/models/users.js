@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
         },
 
         dob: {
-            dob: Date,
+            type: Date,
         },
 
         gender: {
