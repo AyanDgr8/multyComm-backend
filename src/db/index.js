@@ -11,7 +11,7 @@ const connectDB = async () => {
     const options = {
       // useNewUrlParser: true,
       // useUnifiedTopology: true,
-      connectTimeoutMS: 10000, // (10 seconds)
+      connectTimeoutMS: 10000, 
     };
 
     const connectionInstance = await mongoose.connect(uri, options);
@@ -21,5 +21,6 @@ const connectDB = async () => {
     throw error;
   }
 };
+
 
 export default connectDB;
