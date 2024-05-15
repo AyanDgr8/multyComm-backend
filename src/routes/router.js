@@ -16,7 +16,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refres
 
 // To generate access token
 const generateAccessToken = (userId, email) => {
-  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '5m' });
+  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
 };
 
 // To generate refresh token
