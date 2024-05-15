@@ -152,6 +152,8 @@ router.get('/user-data', authMiddleware, async (req, res) => {
   }
 });
 
+
+
 // ***************************
 
 
@@ -193,9 +195,9 @@ router.post('/forgot-password', async (req, res) => {
 // Endpoint for verifying OTP
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, phone, otp } = req.body;
+    const { email, otp } = req.body;
     // Check if either email or phone exists
-    const user = await Users.findOne({ $or: [{ email }, { phone }] });
+    const user = await Users.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -216,6 +218,8 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // ***************************
+
+
 
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
