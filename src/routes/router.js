@@ -5,8 +5,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-import firebase from 'firebase/app';
-import 'firebase/auth';
 
 const router = Router();
 
@@ -25,19 +23,6 @@ const generateAccessToken = (userId, email) => {
 const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
-
-// For Firebase 
-const firebaseConfig = {
-  apiKey: "AIzaSyCxBaGWCjE1F7zRUheeXzoHfCLUUYDj6hg",
-  authDomain: "multycomm-e1901.firebaseapp.com",
-  projectId: "multycomm-e1901",
-  storageBucket: "multycomm-e1901.appspot.com",
-  messagingSenderId: "141466163369",
-  appId: "1:141466163369:web:6c0f27bb28ab34514cf1b8",
-  measurementId: "G-SQKXH5GFWM"
-};
-
-firebase.initializeApp(firebaseConfig);
 
 
 
