@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
+import firebase from 'firebase/app';
+import 'firebase/auth';
 
 const router = Router();
 
@@ -23,6 +25,21 @@ const generateAccessToken = (userId, email) => {
 const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
+
+// For Firebase 
+const firebaseConfig = {
+  apiKey: "AIzaSyCxBaGWCjE1F7zRUheeXzoHfCLUUYDj6hg",
+  authDomain: "multycomm-e1901.firebaseapp.com",
+  projectId: "multycomm-e1901",
+  storageBucket: "multycomm-e1901.appspot.com",
+  messagingSenderId: "141466163369",
+  appId: "1:141466163369:web:6c0f27bb28ab34514cf1b8",
+  measurementId: "G-SQKXH5GFWM"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+
 
 // ***************************
 
@@ -85,7 +102,6 @@ router.post('/user-register', async (req, res) => {
 
 
 // ***************************
-
 
 
 
@@ -165,8 +181,7 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-
-
+// Endpoint for forgot password
 // Endpoint for forgot password
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -184,17 +199,12 @@ router.post('/forgot-password', async (req, res) => {
     const resetLink = `https://MultyComm.firebaseapp.com/reset-password?token=${resetToken}`;
 
     // Send reset link to user's email using Firebase
-    try {
-      await firebase.auth().sendPasswordResetEmail(email, resetLink);
-      console.log(`Reset link sent to ${email}`);
-      res.status(200).json({ message: 'Reset link sent successfully' });
-    } catch (error) {
-      console.error('Error sending reset link:', error);
-      res.status(500).json({ message: 'Error sending reset link' });
-    }
+    await firebase.auth().sendPasswordResetEmail(email, resetLink);
+    console.log(`Reset link sent to ${email}`);
+    res.status(200).json({ message: 'Reset link sent successfully' });
   } catch (error) {
-    console.error('Error generating reset token:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error sending reset link:', error);
+    res.status(500).json({ message: 'Error sending reset link' });
   }
 });
 
@@ -251,6 +261,7 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
   }
 });
 
-// ***************************
+
+
 
 export default router;
