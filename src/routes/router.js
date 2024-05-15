@@ -209,9 +209,9 @@ router.post('/forgot-password', async (req, res) => {
 // Endpoint for verifying OTP
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, phone, otp } = req.body;
-    // Check if either email or phone exists
-    const user = await Users.findOne({ $or: [{ email }, { phone }] });
+    const { email, otp } = req.body;
+    // Check if email exists
+    const user = await Users.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -222,8 +222,10 @@ router.post('/verify-otp', async (req, res) => {
     // Clear OTP and generate new access and refresh tokens
     user.otp = '';
     await user.save();
+
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken();
+    
     res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
     console.error('Error verifying OTP:', error);
