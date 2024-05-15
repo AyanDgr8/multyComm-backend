@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
+import "firebase/firestore";
 
 const router = Router();
 
