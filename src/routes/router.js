@@ -169,14 +169,33 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Generate and send OTP (implementation depends on your chosen OTP service provider)
-    // Once the OTP is sent, you can store it in the database against the user
-    const otp = generateOTP(); // Example function to generate OTP
+    // Function to generate a random numeric OTP
+    const generateOTP = (length) => {
+      const digits = '0123456789';
+      let otp = '';
+      for (let i = 0; i < length; i++) {
+        otp += digits[Math.floor(Math.random() * 10)];
+      }
+      return otp;
+    };
+
+    // Function to send OTP to user's email using Firebase
+    const sendOTP = async (email, otp) => {
+      try {
+        await firebase.auth().sendPasswordResetEmail(email, otp);
+      } catch (error) {
+        throw new Error('Error sending OTP email');
+      }
+    };
+
+
+    // Generate and save OTP
+    const otp = generateOTP(6); // Generate a 6-digit OTP
     user.otp = otp;
     await user.save();
 
-    // Send OTP to user's email (implementation depends on your chosen email service provider)
-    sendOTP(user.email, otp); // Example function to send OTP to registered email
+    // Send OTP to user's email
+    await sendOTP(user.email, otp);
 
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
@@ -208,8 +227,10 @@ router.post('/verify-otp', async (req, res) => {
     // Clear OTP and generate new access and refresh tokens
     user.otp = '';
     await user.save();
+
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken();
+
     res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
     console.error('Error verifying OTP:', error);
@@ -237,6 +258,9 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
   }
 });
 
-// ***************************
+
+
+
+
 
 export default router;
