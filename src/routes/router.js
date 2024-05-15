@@ -181,7 +181,7 @@ router.post('/forgot-password', async (req, res) => {
     const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' }); // Reset token expires in 1 hour
 
     // Construct the reset link with Firebase
-    const resetLink = `https://yourfirebaseproject.firebaseapp.com/reset-password?token=${resetToken}`;
+    const resetLink = `https://MultyComm.firebaseapp.com/reset-password?token=${resetToken}`;
 
     // Send reset link to user's email using Firebase
     try {
@@ -225,7 +225,7 @@ router.post('/verify-otp', async (req, res) => {
 
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken();
-    
+
     res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
     console.error('Error verifying OTP:', error);
