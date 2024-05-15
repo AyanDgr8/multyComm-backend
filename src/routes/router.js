@@ -165,8 +165,6 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-
-// Endpoint for forgot password
 // Endpoint for forgot password
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -174,9 +172,11 @@ router.post('/forgot-password', async (req, res) => {
     // Check if either email or phone exists
     const user = await Users.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      // If the email does not exist, return a response indicating that
+      return res.status(404).json({ exists: false });
     }
 
+    // If the email exists, proceed with sending the password reset email
     // Generate a reset token
     const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' }); // Reset token expires in 1 hour
 
@@ -186,7 +186,7 @@ router.post('/forgot-password', async (req, res) => {
     // Send reset link to user's email using Firebase
     await firebase.auth().sendPasswordResetEmail(email, resetLink);
     console.log(`Reset link sent to ${email}`);
-    res.status(200).json({ message: 'Reset link sent successfully' });
+    res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
   } catch (error) {
     console.error('Error sending reset link:', error);
     res.status(500).json({ message: 'Error sending reset link' });
