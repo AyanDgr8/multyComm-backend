@@ -16,7 +16,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refres
 
 // To generate access token
 const generateAccessToken = (userId, email) => {
-  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
+  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '2m' });
 };
 
 // To generate refresh token
@@ -24,11 +24,7 @@ const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
 
-
-
 // ***************************
-
-
 
 // Endpoint for registration
 router.post('/user-register', async (req, res) => {
@@ -87,7 +83,10 @@ router.post('/user-register', async (req, res) => {
 
 
 
+
 // ***************************
+
+
 
 
 
@@ -125,7 +124,11 @@ router.post('/user-login', async (req, res) => {
 
 
 
+
 // ***************************
+
+
+
 
 
 
@@ -154,52 +157,43 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-// ***************************
+
+
+// ******************************
+
+
+
+
+
 
 
 // Endpoint for forgot password
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-
-    // Check if the email exists in the database
+    // Check if either email or phone exists
     const user = await Users.findOne({ email });
-
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Function to generate a random numeric OTP
-    const generateOTP = (length) => {
-      const digits = '0123456789';
-      let otp = '';
-      for (let i = 0; i < length; i++) {
-        otp += digits[Math.floor(Math.random() * 10)];
-      }
-      return otp;
-    };
+    // Generate a reset token
+    const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' }); // Reset token expires in 1 hour
 
-    // Function to send OTP to user's email using Firebase
-    const sendOTP = async (email, otp) => {
-      try {
-        await firebase.auth().sendPasswordResetEmail(email, otp);
-      } catch (error) {
-        throw new Error('Error sending OTP email');
-      }
-    };
+    // Construct the reset link with Firebase
+    const resetLink = `https://yourfirebaseproject.firebaseapp.com/reset-password?token=${resetToken}`;
 
-
-    // Generate and save OTP
-    const otp = generateOTP(6); // Generate a 6-digit OTP
-    user.otp = otp;
-    await user.save();
-
-    // Send OTP to user's email
-    await sendOTP(user.email, otp);
-
-    res.status(200).json({ message: 'OTP sent successfully' });
+    // Send reset link to user's email using Firebase
+    try {
+      await firebase.auth().sendPasswordResetEmail(email, resetLink);
+      console.log(`Reset link sent to ${email}`);
+      res.status(200).json({ message: 'Reset link sent successfully' });
+    } catch (error) {
+      console.error('Error sending reset link:', error);
+      res.status(500).json({ message: 'Error sending reset link' });
+    }
   } catch (error) {
-    console.error('Error sending OTP:', error);
+    console.error('Error generating reset token:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -211,12 +205,13 @@ router.post('/forgot-password', async (req, res) => {
 
 
 
+
 // Endpoint for verifying OTP
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, phone, otp } = req.body;
     // Check if either email or phone exists
-    const user = await Users.findOne({ email });
+    const user = await Users.findOne({ $or: [{ email }, { phone }] });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -227,10 +222,8 @@ router.post('/verify-otp', async (req, res) => {
     // Clear OTP and generate new access and refresh tokens
     user.otp = '';
     await user.save();
-
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken();
-
     res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
     console.error('Error verifying OTP:', error);
@@ -239,8 +232,6 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // ***************************
-
-
 
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
@@ -258,9 +249,6 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
-
+// ***************************
 
 export default router;
