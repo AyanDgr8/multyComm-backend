@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-import "firebase/firestore";
+// import "firebase/firestore";
 
 const router = Router();
 
@@ -17,7 +17,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refres
 
 // To generate access token
 const generateAccessToken = (userId, email) => {
-  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '2m' });
+  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
 };
 
 // To generate refresh token
@@ -137,6 +137,8 @@ router.post('/user-login', async (req, res) => {
 // Define the route to fetch user data
 router.get('/user-data', authMiddleware, async (req, res) => {
   try {
+
+
     // The user ID is already attached to the request object by the authMiddleware
     const userId = req.userId;
 
@@ -166,25 +168,30 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-// Endpoint for forgot password
+// Endpoint for forgot password with improved error handling and validation
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
 
+    // Basic email validation (add more thorough validation if needed)
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!email || !emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please enter a valid email address.' });
+    }
 
     // Check if email exists
     const user = await Users.findOne({ email });
 
     if (!user) {
-      // If the email does not exist, return a response indicating that
-      return res.status(400).json({ message: 'Email not found' });
+      // Informative error message for not found email
+      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
 
-    // If the email exists, proceed with sending the password reset email
+    // If email exists, proceed with sending the password reset email
     // Generate a reset token
-    const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' }); 
+    const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
 
-    // Construct the reset link with Firebase
+    // Construct the reset link with Firebase (assuming you have it configured)
     const resetLink = `https://MultyComm.firebaseapp.com/reset-password?token=${resetToken}`;
 
     // Send reset link to user's email using Firebase
@@ -193,9 +200,10 @@ router.post('/forgot-password', async (req, res) => {
     res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
   } catch (error) {
     console.error('Error sending reset link:', error);
-    res.status(500).json({ message: 'Error sending reset link' });
+    res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); // Generic error message
   }
 });
+
 
 
 
