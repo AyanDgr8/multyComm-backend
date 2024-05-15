@@ -16,7 +16,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refres
 
 // To generate access token
 const generateAccessToken = (userId, email) => {
-  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '15m' });
+  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '2m' });
 };
 
 // To generate refresh token
@@ -24,7 +24,11 @@ const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
 
+
+
 // ***************************
+
+
 
 // Endpoint for registration
 router.post('/user-register', async (req, res) => {
@@ -81,15 +85,19 @@ router.post('/user-register', async (req, res) => {
   }
 });
 
+
+
 // ***************************
+
+
 
 // Endpoint for login
 router.post('/user-login', async (req, res) => {
   try {
-    const { username, password } = req.body; 
+    const { usernameOrEmail, password } = req.body; 
 
-    // Check if the user exists
-    const user = await Users.findOne({ username }); 
+    // Check if the user exists by username or email
+    const user = await Users.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] }); 
 
     if (!user) {
       return res.status(401).json({ message: 'Authentication failed' });
@@ -114,7 +122,12 @@ router.post('/user-login', async (req, res) => {
   }
 });
 
+
+
+
 // ***************************
+
+
 
 // Define the route to fetch user data
 router.get('/user-data', authMiddleware, async (req, res) => {
