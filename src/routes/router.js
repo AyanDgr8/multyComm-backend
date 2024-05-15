@@ -169,16 +169,19 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-    // Check if either email or phone exists
+
+
+    // Check if email exists
     const user = await Users.findOne({ email });
+
     if (!user) {
       // If the email does not exist, return a response indicating that
-      return res.status(404).json({ exists: false });
+      return res.status(400).json({ message: 'Email not found' });
     }
 
     // If the email exists, proceed with sending the password reset email
     // Generate a reset token
-    const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' }); // Reset token expires in 1 hour
+    const resetToken = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' }); 
 
     // Construct the reset link with Firebase
     const resetLink = `https://MultyComm.firebaseapp.com/reset-password?token=${resetToken}`;
