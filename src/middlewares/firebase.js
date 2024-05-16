@@ -1,7 +1,7 @@
 // src/firebase.js
 
 
-import admin from 'firebase-admin';
+// import admin from 'firebase-admin';
 import { initializeApp } from "firebase/app";
 import { getAuth as getFirebaseAuth, sendPasswordResetEmail as sendFirebasePasswordResetEmail } from "firebase/auth";
 // import { getAuth as getAdminAuth, sendPasswordResetEmail as sendAdminPasswordResetEmail } from "firebase-admin/auth";
@@ -21,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 const firebaseAuth = getFirebaseAuth(app);
 
 // Initialize Firebase Admin SDK
-admin.initializeApp(firebaseConfig);
+// admin.initializeApp(firebaseConfig);
 // const adminAuth = getAdminAuth();
 
 const sendPasswordReset = async (email) => {
@@ -29,11 +29,6 @@ const sendPasswordReset = async (email) => {
         // Send password reset email using Firebase SDK for JavaScript
         await sendFirebasePasswordResetEmail(firebaseAuth, email);
         console.log(`Password reset link sent to ${email} using Firebase SDK for JavaScript`);
-
-        // // Send password reset email using Firebase Admin SDK
-        // await sendAdminPasswordResetEmail(adminAuth, email);
-        // console.log(`Password reset link sent to ${email} using Firebase Admin SDK`);
-
         return true;
     } catch (error) {
         console.error('Error sending reset link:', error);
