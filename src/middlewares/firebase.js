@@ -2,7 +2,7 @@
 
 import admin from 'firebase-admin';
 
-// Replace placeholders with your actual Firebase project configuration details
+
 const firebaseConfig = {
     apiKey: "AIzaSyCxBaGWCjE1F7zRUheeXzoHfCLUUYDj6hg",
     authDomain: "multycomm-e1901.firebaseapp.com",
