@@ -19,7 +19,7 @@ admin.initializeApp(firebaseConfig);
 
 const sendPasswordReset = async (email) => {
       try {
-        await admin.auth().sendPasswordResetEmail(email);
+        await admin.sendPasswordResetEmail(email);
         console.log(`Password reset link sent to ${email}`);
         return true;
       } catch (error) {
