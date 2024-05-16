@@ -39,7 +39,6 @@ const auth = getAuth(app);
 const sendPasswordReset = async(email) => {
   try {
       await sendPasswordResetEmail(auth,email)
-      alert("Password reset link sent!");
       console.log(`Password reset link sent to ${email}`);
       return true;
   } catch(error){
