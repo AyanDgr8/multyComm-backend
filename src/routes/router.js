@@ -5,8 +5,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-import { sendPasswordReset } from '../middlewares/firebase.js';
-
+const firebase = require('../middlewares/firebase.js');
 
 const router = Router();
 
@@ -174,12 +173,6 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Basic email validation (add more thorough validation if needed)
-    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!email || !emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Please enter a valid email address.' });
-    }
-
     // Check if email exists in your user database
     const user = await Users.findOne({ email });
 
@@ -188,23 +181,15 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
 
-    // Generate a random password reset token (optional)
-    // You can store the token in your database with an expiration time
-    // const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    // Send password reset email using Firebase Admin
-    const resetSent = await sendPasswordReset(email);
-
-    if (resetSent) {
-      console.log(`Password reset link sent to ${email}`);
-      res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
-    } else {
-      console.error('Error sending reset link:', error);
-      res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' });
-    }
-  } catch (error) {
+    // Use Firebase to send the password reset email
+    await firebase.sendPasswordResetEmail(email);
+    
+    // Send success response
+    console.log(`Password reset link sent to ${email}`);
+    res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
+    } catch (error) {
     console.error('Error sending reset link:', error);
-    res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); // Generic error message
+    res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); 
   }
 });
 
