@@ -1,9 +1,9 @@
 // src/firebase.js
 
 import admin from 'firebase-admin';
+import { initializeApp } from "firebase/app";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
-const auth = getAuth(app)
 
 
 const firebaseConfig = {
@@ -18,7 +18,12 @@ const firebaseConfig = {
 
 
 // Initialize Firebase
-admin.initializeApp(firebaseConfig);
+// admin.initializeApp(firebaseConfig);
+// admin.getAuth(app)
+
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 // const sendPasswordReset = async (email) => {
 //       try {
