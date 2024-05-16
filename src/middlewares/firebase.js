@@ -17,9 +17,9 @@ const firebaseConfig = {
 // Initialize Firebase
 admin.initializeApp(firebaseConfig);
 
-const sendPasswordResetEmail = async (email) => {
+const sendPasswordReset = async (email) => {
       try {
-        await admin.auth().sendPasswordResetEmail(email);
+        await admin.sendPasswordResetEmail(auth, email);
         console.log(`Password reset link sent to ${email}`);
         return true;
       } catch (error) {
@@ -28,4 +28,4 @@ const sendPasswordResetEmail = async (email) => {
       }
 };
 
-export { sendPasswordResetEmail };
+export { sendPasswordReset };

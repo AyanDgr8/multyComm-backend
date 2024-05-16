@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 // const firebase = require('../middlewares/firebase.js');
-import { sendPasswordResetEmail } from '../middlewares/firebase.js';
+import { sendPasswordReset } from '../middlewares/firebase.js';
 
 
 
@@ -187,7 +187,7 @@ router.post('/forgot-password', async (req, res) => {
 
     // Use Firebase to send the password reset email
     await sendPasswordResetEmail(email); 
-    
+
     // Send success response
     console.log(`Password reset link sent to ${email}`);
     res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
