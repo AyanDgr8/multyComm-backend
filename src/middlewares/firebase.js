@@ -1,50 +1,44 @@
 // src/firebase.js
 
+
 import admin from 'firebase-admin';
 import { initializeApp } from "firebase/app";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-
-
+import { getAuth as getFirebaseAuth, sendPasswordResetEmail as sendFirebasePasswordResetEmail } from "firebase/auth";
+// import { getAuth as getAdminAuth, sendPasswordResetEmail as sendAdminPasswordResetEmail } from "firebase-admin/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCxBaGWCjE1F7zRUheeXzoHfCLUUYDj6hg",
-    authDomain: "multycomm-e1901.firebaseapp.com",
-    projectId: "multycomm-e1901",
-    storageBucket: "multycomm-e1901.appspot.com",
-    messagingSenderId: "141466163369",
-    appId: "1:141466163369:web:b437073326f52f2c4cf1b8",
-    measurementId: "G-847866NMZQ"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
 };
 
-
-// Initialize Firebase
-// admin.initializeApp(firebaseConfig);
-// admin.getAuth(app)
-
-
+// Initialize Firebase SDK
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const firebaseAuth = getFirebaseAuth(app);
 
-// const sendPasswordReset = async (email) => {
-//       try {
-//         await admin.sendPasswordResetEmail(email);
-//         console.log(`Password reset link sent to ${email}`);
-//         return true;
-//       } catch (error) {
-//         console.error('Error sending reset link:', error);
-//         return false;
-//       }
-// };
+// Initialize Firebase Admin SDK
+admin.initializeApp(firebaseConfig);
+// const adminAuth = getAdminAuth();
 
-const sendPasswordReset = async(email) => {
-  try {
-      await sendPasswordResetEmail(auth,email)
-      console.log(`Password reset link sent to ${email}`);
-      return true;
-  } catch(error){
-    console.error('Error sending reset link:', error);
-    return false;
-  }
-}
+const sendPasswordReset = async (email) => {
+    try {
+        // Send password reset email using Firebase SDK for JavaScript
+        await sendFirebasePasswordResetEmail(firebaseAuth, email);
+        console.log(`Password reset link sent to ${email} using Firebase SDK for JavaScript`);
+
+        // // Send password reset email using Firebase Admin SDK
+        // await sendAdminPasswordResetEmail(adminAuth, email);
+        // console.log(`Password reset link sent to ${email} using Firebase Admin SDK`);
+
+        return true;
+    } catch (error) {
+        console.error('Error sending reset link:', error);
+        return false;
+    }
+};
 
 export { sendPasswordReset };
