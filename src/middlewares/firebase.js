@@ -1,5 +1,7 @@
 // src/firebase.js
-const admin = require('firebase-admin');
+
+import admin from 'firebase-admin';
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -26,4 +28,4 @@ const sendPasswordResetEmail = async (email) => {
     }
 }
 
-module.exports = { sendPasswordResetEmail };
+export { sendPasswordResetEmail };

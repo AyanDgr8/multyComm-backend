@@ -5,7 +5,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-const firebase = require('../middlewares/firebase.js');
+import { sendPasswordResetEmail } from '../middlewares/firebase.js'; 
+
+
 
 const router = Router();
 
@@ -161,7 +163,7 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-
+// ******************************
 
 // ******************************
 
@@ -181,8 +183,11 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
 
+
     // Use Firebase to send the password reset email
-    await firebase.sendPasswordResetEmail(email);
+    const firebase= await import('../middlewares/firebase.js'); 
+    await firebase.sendPasswordResetEmail(email); 
+    // await sendPasswordResetEmail(email);
     
     // Send success response
     console.log(`Password reset link sent to ${email}`);
