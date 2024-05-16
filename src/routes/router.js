@@ -185,9 +185,7 @@ router.post('/forgot-password', async (req, res) => {
 
 
     // Use Firebase to send the password reset email
-    const firebase= await import('../middlewares/firebase.js'); 
-    await firebase.sendPasswordResetEmail(email); 
-    // await sendPasswordResetEmail(email);
+    await sendPasswordResetEmail(email);
     
     // Send success response
     console.log(`Password reset link sent to ${email}`);
