@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-// const firebase = require('../middlewares/firebase.js');
 import { sendPasswordReset } from '../middlewares/firebase.js';
 
 
@@ -27,6 +26,19 @@ const generateAccessToken = (userId, email) => {
 const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
+
+
+// Setup nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // or your email service
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Generate OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 
 
@@ -129,10 +141,7 @@ router.post('/user-login', async (req, res) => {
 
 
 
-
 // ***************************
-
-
 
 
 
@@ -200,40 +209,92 @@ router.post('/forgot-password', async (req, res) => {
 
 
 
-
 // ***************************
 
+// Endpoint for sending OTP
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the user exists by email
+    const user = await Users.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate OTP
+    const otp = generateOTP();
+
+    // Save OTP to user's record (ideally it should be hashed, but for simplicity we'll save it directly)
+    user.otp = otp;
+    await user.save();
+
+    // Send OTP via email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your OTP Code',
+      text: `Your OTP code is ${otp}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`OTP for ${email}: ${otp}`);
+
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+// ***************************
 
 
 
 // Endpoint for verifying OTP
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp, newPassword } = req.body;
+
     // Check if email exists
     const user = await Users.findOne({ email });
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     // Check if OTP matches
     if (user.otp !== otp) {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
-    // Clear OTP and generate new access and refresh tokens
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password and clear the OTP
+    user.password = hashedPassword;
     user.otp = '';
     await user.save();
 
+    // Generate new tokens
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken();
 
-    res.status(200).json({ accessToken, refreshToken, userId: user._id });
+    res.status(200).json({ accessToken, refreshToken, userId: user._id, message: 'Password reset successfully' });
   } catch (error) {
     console.error('Error verifying OTP:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
+
+
 // ***************************
+
+
 
 // JWT authorization
 router.get('/protected-route', authMiddleware, async (req, res) => {
@@ -250,8 +311,5 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-
-
 
 export default router;
