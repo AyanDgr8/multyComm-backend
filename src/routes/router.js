@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 import { sendPasswordReset } from '../middlewares/firebase.js';
+import nodemailer from 'nodemailer';
 
 
 
