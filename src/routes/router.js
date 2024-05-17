@@ -27,45 +27,19 @@ const generateRefreshToken = () => {
 };
 
 
-// // Setup nodemailer transporter
-// const transporter = nodemailer.createTransport({
-//   service: 'Gmail', 
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
-
-
-
-// Generate OTP
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-
-// ******************
-
+// Setup nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', // Replace with your service (e.g., Outlook)
+  service: 'Gmail', 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-const mailOptions = {
-  from: process.env.EMAIL_USER,
-  to: 'recipient@example.com',
-  subject: 'Test Email',
-  text: 'This is a test email to verify functionality.'
-};
+// Generate OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-transporter.sendMail(mailOptions, (error, info) => {
-  if (error) {
-    console.error('Error sending email:', error);
-  } else {
-    console.log('Email sent:', info.response);
-  }
-});
+
 
 
 
