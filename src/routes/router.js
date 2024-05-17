@@ -10,6 +10,7 @@ import nodemailer from 'nodemailer';
 
 const router = Router();
 
+
 // Secret key for JWT signing
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
 
@@ -27,17 +28,41 @@ const generateRefreshToken = () => {
 };
 
 
-// Setup nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: 'Gmail', 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
-// Generate OTP
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+// Function to update user's password in the database
+const updateUserPassword = async (email, newPassword) => {
+  try {
+    // Hash the new password before saving it to the database
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Find the user by email and update the password
+    const updatedUser = await Users.findOneAndUpdate(
+      { email },
+      { $set: { password: hashedPassword } },
+      { new: true } // Return the updated user document
+    );
+
+    if (!updatedUser) {
+      throw new Error('User not found');
+    }
+
+    return updatedUser;
+  } catch (error) {
+    throw new Error(`Error updating user password: ${error.message}`);
+  }
+};
+
+// // Setup nodemailer transporter
+// const transporter = nodemailer.createTransport({
+//   service: 'Gmail', 
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// // Generate OTP
+// const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 
 
@@ -210,53 +235,72 @@ router.post('/forgot-password', async (req, res) => {
 
 
 
-// ***************************
+// // ***************************
 
 
-// Endpoint for sending OTP
-router.post('/send-otp', async (req, res) => {
+// // Endpoint for sending OTP
+// router.post('/send-otp', async (req, res) => {
+//   try {
+//     const { email } = req.body;
+
+//     // Check if the user exists by email
+//     const user = await Users.findOne({ email });
+
+//     if (!user) {
+//       // Informative error message for not found email
+//       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
+//     }
+
+//     // Generate token
+//     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
+
+//     // Configure transporter
+//     const transporter = nodemailer.createTransport({
+//       service: 'gmail',
+//       auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS
+//       }
+//     });
+
+//     // Mail options
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: email,
+//       subject: 'Reset Password Link',
+//       text: `Your OTP code is ${token}`
+//     };
+
+//     // Send mail
+//     transporter.sendMail(mailOptions, function (error, info) {
+//       if (error) {
+//         console.log(error);
+//         return res.status(500).json({ message: 'Error sending email' });
+//       } else {
+//         return res.status(200).json({ message: 'OTP sent successfully' });
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error sending OTP:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+
+// ******************
+
+
+// Endpoint for resetting password through Firebase
+router.post('/reset-password', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, newPassword } = req.body;
 
-    // Check if the user exists by email
-    const user = await Users.findOne({ email });
+    // Update user's password in the backend
+    await updateUserPassword(email, newPassword);
 
-    if (!user) {
-      // Informative error message for not found email
-      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
-    }
-
-    // Generate token
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
-
-    // Configure transporter
-    var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    // Mail options
-    var mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Reset Password Link',
-      text: `Your OTP code is ${token}`
-    };
-
-    // Send mail
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Error sending email' });
-      } else {
-        return res.status(200).json({ message: 'OTP sent successfully' });
-      }
-    });
+    res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Error sending OTP:', error);
+    console.error('Error resetting password:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
