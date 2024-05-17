@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 import { sendPasswordReset } from '../middlewares/firebase.js';
-import nodemailer from 'nodemailer';
+import { nodemailer } from 'nodemailer';
 
 const router = Router();
 
@@ -220,7 +220,8 @@ router.post('/send-otp', async (req, res) => {
     const user = await Users.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      // Informative error message for not found email
+      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
 
     // Generate OTP
@@ -240,7 +241,6 @@ router.post('/send-otp', async (req, res) => {
 
     await transporter.sendMail(mailOptions);
     console.log(`OTP for ${email}: ${otp}`);
-
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
     console.error('Error sending OTP:', error);  
