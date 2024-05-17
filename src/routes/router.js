@@ -227,7 +227,7 @@ router.post('/send-otp', async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign({ id: user._id }, "jwt_secret_key", { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
 
     // Configure transporter
     var transporter = nodemailer.createTransport({
