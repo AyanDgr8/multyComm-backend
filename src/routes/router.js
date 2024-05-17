@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 import { sendPasswordReset } from '../middlewares/firebase.js';
-import { nodemailer } from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 const router = Router();
 
@@ -211,6 +211,8 @@ router.post('/forgot-password', async (req, res) => {
 
 
 // ***************************
+
+
 // Endpoint for sending OTP
 router.post('/send-otp', async (req, res) => {
   try {
@@ -224,30 +226,41 @@ router.post('/send-otp', async (req, res) => {
       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
 
-    // Generate OTP
-    const otp = generateOTP();
 
-    // Save OTP to user's record (ideally it should be hashed, but for simplicity we'll save it directly)
-    user.otp = otp;
-    await user.save();
+    // Generate token
+    const token = jwt.sign({ id: user._id }, "jwt_secret_key", { expiresIn: "1d" });
 
-    // Send OTP via email
-    const mailOptions = {
+    // Configure transporter
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Mail options
+    var mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Your OTP Code',
-      text: `Your OTP code is ${otp}`,
+      subject: 'Reset Password Link',
+      text: `http://localhost:5173/reset_password/${user._id}/${token}`
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`OTP for ${email}: ${otp}`);
-    res.status(200).json({ message: 'OTP sent successfully' });
+    // Send mail
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error sending email' });
+      } else {
+        return res.status(200).json({ message: 'OTP sent successfully' });
+      }
+    });
   } catch (error) {
-    console.error('Error sending OTP:', error);  
+    console.error('Error sending OTP:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 
 
