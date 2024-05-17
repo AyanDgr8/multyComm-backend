@@ -8,7 +8,6 @@ import { Users } from '../models/users.js';
 import { sendPasswordReset } from '../middlewares/firebase.js';
 
 
-
 const router = Router();
 
 // Secret key for JWT signing
