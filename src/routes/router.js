@@ -226,7 +226,6 @@ router.post('/send-otp', async (req, res) => {
       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
 
-
     // Generate token
     const token = jwt.sign({ id: user._id }, "jwt_secret_key", { expiresIn: "1d" });
 
@@ -244,7 +243,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `http://localhost:5173/reset_password/${user._id}/${token}`
+      text: `Your OTP code is ${token}`
     };
 
     // Send mail
