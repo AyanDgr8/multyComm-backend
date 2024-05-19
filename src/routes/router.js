@@ -29,18 +29,18 @@ const router = Router();
 
 
 // ******************
-// // Secret key for refresh token signing
-// const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret';
+// Secret key for refresh token signing
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret';
 
-// // To generate access token
-// const generateAccessToken = (userId, email) => {
-//   return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
-// };
+// To generate access token
+const generateAccessToken = (userId, email) => {
+  return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
+};
 
-// // To generate refresh token
-// const generateRefreshToken = () => {
-//   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
-// };
+// To generate refresh token
+const generateRefreshToken = () => {
+  return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
+};
 
 // ****************************
 
