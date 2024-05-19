@@ -52,17 +52,19 @@ const updateUserPassword = async (email, newPassword) => {
   }
 };
 
-// // Setup nodemailer transporter
-// const transporter = nodemailer.createTransport({
-//   service: 'Gmail', 
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
 
-// // Generate OTP
-// const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+// Setup nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', 
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Generate OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 
 
@@ -165,11 +167,7 @@ router.post('/user-login', async (req, res) => {
 });
 
 
-
-
 // ***************************
-
-
 
 
 // Define the route to fetch user data
@@ -235,76 +233,96 @@ router.post('/forgot-password', async (req, res) => {
 
 
 
-// // ***************************
+// ***************************
 
 
-// // Endpoint for sending OTP
-// router.post('/send-otp', async (req, res) => {
-//   try {
-//     const { email } = req.body;
+// Endpoint for sending OTP
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
 
-//     // Check if the user exists by email
-//     const user = await Users.findOne({ email });
+    // Check if the user exists by email
+    const user = await Users.findOne({ email });
 
-//     if (!user) {
-//       // Informative error message for not found email
-//       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
-//     }
+    if (!user) {
+      // Informative error message for not found email
+      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
+    }
 
-//     // Generate token
-//     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
+    // Generate token
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
 
-//     // Configure transporter
-//     const transporter = nodemailer.createTransport({
-//       service: 'gmail',
-//       auth: {
-//         user: process.env.EMAIL_USER,
-//         pass: process.env.EMAIL_PASS
-//       }
-//     });
+    // Configure transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
 
-//     // Mail options
-//     const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to: email,
-//       subject: 'Reset Password Link',
-//       text: `Your OTP code is ${token}`
-//     };
+    // Mail options
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Reset Password Link',
+      text: `http://localhost:5173/reset_password/${user._id}/${token}`
+    };
 
-//     // Send mail
-//     transporter.sendMail(mailOptions, function (error, info) {
-//       if (error) {
-//         console.log(error);
-//         return res.status(500).json({ message: 'Error sending email' });
-//       } else {
-//         return res.status(200).json({ message: 'OTP sent successfully' });
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error sending OTP:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// });
+    // Send mail
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error sending email' });
+      } else {
+        return res.status(200).json({ message: 'OTP sent successfully' });
+      }
+    });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 // ******************
 
 
 // Endpoint for resetting password through Firebase
-router.post('/reset-password', async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
+// router.post('/reset-password/:id/:token', async (req, res) => {
+//   try {
+//     const { email, newPassword } = req.body;
 
-    // Update user's password in the backend
-    await updateUserPassword(email, newPassword);
+//     // Update user's password in the backend
+//     await updateUserPassword(email, newPassword);
 
-    res.status(200).json({ message: 'Password updated successfully' });
-  } catch (error) {
-    console.error('Error resetting password:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+//     res.status(200).json({ message: 'Password updated successfully' });
+//   } catch (error) {
+//     console.error('Error resetting password:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 
+// *****
+
+router.post('/reset-password/:id/:token', (req, res) => {
+  const {id, token} = req.params
+  const {password} = req.body
+
+  jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+      if(err) {
+          return res.json({Status: "Error with token"})
+      } else {
+          bcrypt.hash(password, 10)
+          .then(hash => {
+              UserModel.findByIdAndUpdate({_id: id}, {password: hash})
+              .then(u => res.send({Status: "Success"}))
+              .catch(err => res.send({Status: err}))
+          })
+          .catch(err => res.send({Status: err}))
+      }
+  })
+})
 
 
 // ***************************
@@ -337,8 +355,8 @@ router.post('/verify-otp', async (req, res) => {
     await user.save();
 
     // Generate new tokens
-    const accessToken = generateAccessToken(user._id, user.email);
-    const refreshToken = generateRefreshToken();
+    // const accessToken = generateAccessToken(user._id, user.email);
+    // const refreshToken = generateRefreshToken();
 
     res.status(200).json({ accessToken, refreshToken, userId: user._id, message: 'Password reset successfully' });
   } catch (error) {
