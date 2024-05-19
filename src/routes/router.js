@@ -270,7 +270,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `http://localhost:3000/reset_password/${user._id}/${token}`
+      text: `http://localhost:3000/reset-password/${user._id}/${token}`
     };
 
     // Send mail
@@ -304,11 +304,11 @@ router.post('/reset-password/:id/:token', (req, res) => {
       } else {
           bcrypt.hash(newPassword, 10)
           .then(hash => {
-            Users.findByIdAndUpdate({_id: id}, {password: hash})
-              .then(u => res.send({Status: "Success"}))
-              .catch(err => res.send({Status: err}))
+            Users.findByIdAndUpdate(id, {password: hash})
+            .then(() => res.json({ Status: 'Success' }))
+            .catch(err => res.json({ Status: err.message }));
           })
-          .catch(err => res.send({Status: err}))
+          .catch(err => res.json({ Status: err.message }));
       }
   })
 })
