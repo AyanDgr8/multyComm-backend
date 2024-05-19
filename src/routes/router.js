@@ -293,34 +293,18 @@ router.post('/send-otp', async (req, res) => {
 
 
 // Endpoint for resetting password through Firebase
-// router.post('/reset-password/:id/:token', async (req, res) => {
-//   try {
-//     const { email, newPassword } = req.body;
-
-//     // Update user's password in the backend
-//     await updateUserPassword(email, newPassword);
-
-//     res.status(200).json({ message: 'Password updated successfully' });
-//   } catch (error) {
-//     console.error('Error resetting password:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// });
-
-
-// *****
 
 router.post('/reset-password/:id/:token', (req, res) => {
-  const {id, token} = req.params
-  const {password} = req.body
+  const { id, token } = req.params
+  const { newPassword } = req.body
 
-  jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if(err) {
           return res.json({Status: "Error with token"})
       } else {
-          bcrypt.hash(password, 10)
+          bcrypt.hash(newPassword, 10)
           .then(hash => {
-              UserModel.findByIdAndUpdate({_id: id}, {password: hash})
+            Users.findByIdAndUpdate({_id: id}, {password: hash})
               .then(u => res.send({Status: "Success"}))
               .catch(err => res.send({Status: err}))
           })
