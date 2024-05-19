@@ -13,34 +13,38 @@ const router = Router();
 
 // **************
 
-// // Secret key for JWT signing
-// const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
+// Secret key for JWT signing
+const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
 
-
-// // To generate access token
-// export const generateAccessToken = (userId, email) => {
-//   return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
-// };
-
-// // To generate refresh token
-// export const generateRefreshToken = (userId) => {
-//   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
-// };
-
-
-// ******************
-// Secret key for refresh token signing
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret';
 
 // To generate access token
-const generateAccessToken = (userId, email) => {
+export const generateAccessToken = (userId, email) => {
   return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
 };
 
 // To generate refresh token
-const generateRefreshToken = () => {
-  return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
+export const generateRefreshToken = (userId) => {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
 };
+
+
+// ******************
+
+// // Secret key for JWT signing
+// const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
+
+// // Secret key for refresh token signing
+// const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret';
+
+// // To generate access token
+// const generateAccessToken = (userId, email) => {
+//   return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '10m' });
+// };
+
+// // To generate refresh token
+// const generateRefreshToken = () => {
+//   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
+// };
 
 // ****************************
 
@@ -82,10 +86,9 @@ const generateRefreshToken = () => {
 // const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 
-
-
-
 // ***************************
+
+
 
 // Endpoint for registration
 router.post('/user-register', async (req, res) => {
@@ -127,7 +130,7 @@ router.post('/user-register', async (req, res) => {
 
     // Create a JWT token and refresh token for the registered user
     const accessToken = generateAccessToken(newUser._id, newUser.email);
-    const refreshToken = generateRefreshToken();
+    const refreshToken = generateRefreshToken(newUser._id);
 
     res.status(201).json({
       message: 'User registered successfully',
