@@ -6,6 +6,8 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { generateAccessToken, generateRefreshToken } from '../routes/router.js'; // Import token generation functions
+
 
 dotenv.config();
 
@@ -80,9 +82,7 @@ userSchema.pre("save", async function (next) {
 // Generate auth token
 userSchema.methods.generateAccessToken = async function () {
     try {
-        const token = jwt.sign({ _id: this._id, email: this.email }, JWT_SECRET, {
-            expiresIn: "10m",
-        });
+        const token = generateAccessToken(this._id, this.email); // Use generateAccessToken function
         this.tokens = this.tokens.concat({ token });
         await this.save();
         return token;
@@ -94,9 +94,7 @@ userSchema.methods.generateAccessToken = async function () {
 // Generate refresh token
 userSchema.methods.generateRefreshToken = async function () {
     try {
-        const refreshToken = jwt.sign({ _id: this._id }, JWT_SECRET, {
-            expiresIn: "24h",
-        });
+        const refreshToken = generateRefreshToken(this._id); // Use generateRefreshToken function
         this.refreshToken = refreshToken;
         await this.save();
         return refreshToken;
