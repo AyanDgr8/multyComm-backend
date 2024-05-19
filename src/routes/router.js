@@ -174,7 +174,7 @@ router.post('/user-login', async (req, res) => {
 
     // Create a JWT token and refresh token for the authenticated user
     const accessToken = generateAccessToken(user._id, user.email);
-    const refreshToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
@@ -252,7 +252,7 @@ router.post('/reset-password/:id/:token', (req, res) => {
   const {id, token} = req.params
   const {password} = req.body
 
-  jwt.verify(token, "jwt_secret_key", (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET || 'default_jwt_secret', (err, decoded) => {
       if(err) {
           return res.json({Status: "Error with token"})
       } else {
