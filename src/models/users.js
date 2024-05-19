@@ -78,7 +78,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // Generate auth token
-userSchema.methods.generateAuthToken = async function () {
+userSchema.methods.generateAccessToken = async function () {
     try {
         const token = jwt.sign({ _id: this._id, email: this.email }, JWT_SECRET, {
             expiresIn: "10m",
