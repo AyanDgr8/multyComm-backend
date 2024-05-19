@@ -13,6 +13,7 @@ const app = express();
 const corsOptions = {
     origin: 'http://localhost:3000', // Change this to the origin of your frontend
     credentials: true, // Allow credentials
+    optionsSuccessStatus: 200
   };
 
 app.use(cors());
