@@ -9,6 +9,12 @@ import { errorHandler, notFoundHandler } from './middlewares/errorHandling.js';
 const app = express();
 
 
+// CORS configuration
+const corsOptions = {
+    origin: 'http://localhost:3000', // Change this to the origin of your frontend
+    credentials: true, // Allow credentials
+  };
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
