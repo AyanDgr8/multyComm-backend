@@ -266,7 +266,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `http://localhost:5173/reset_password/${user._id}/${token}`
+      text: `http://localhost:3000/reset_password/${user._id}/${token}`
     };
 
     // Send mail
