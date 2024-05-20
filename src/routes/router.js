@@ -208,36 +208,6 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-// Endpoint for forgot password with improved error handling and validation
-
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    // Check if email exists in your user database
-    const user = await Users.findOne({ email });
-
-    if (!user) {
-      // Informative error message for not found email
-      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
-    }
-
-    // Use Firebase to send the password reset email
-    await sendPasswordReset(email); 
-
-    // Send success response
-    console.log(`Password reset link sent to ${email}`);
-    res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
-    } catch (error) {
-    console.error('Error sending reset link:', error);
-    res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); 
-  }
-});
-
-
-
-
-// ***************************
 
 
 // Endpoint for sending OTP
@@ -270,7 +240,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `http://localhost:3000/reset-password/${user._id}/${token}`
+      text: `https://multycomm.netlify.app/${user._id}/${token}`
     };
 
     // Send mail
@@ -318,6 +288,24 @@ router.post('/reset-password/:id/:token', (req, res) => {
 
 
 
+// JWT authorization
+router.get('/protected-route', authMiddleware, async (req, res) => {
+  try {
+    const userData = await Users.findById(req.userId);
+    if (userData) {
+      res.json({ message: 'User data retrieved successfully', data: userData });
+    } else {
+      res.status(404).json({ message: 'User data not found' });
+    }
+  } catch (error) {
+    // Handle errors
+    console.error('Error retrieving user data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ***********
+
 // Endpoint for verifying OTP
 router.post('/verify-otp', async (req, res) => {
   try {
@@ -358,22 +346,36 @@ router.post('/verify-otp', async (req, res) => {
 
 // ***************************
 
+// Endpoint for forgot password with improved error handling and validation
 
-
-// JWT authorization
-router.get('/protected-route', authMiddleware, async (req, res) => {
+router.post('/forgot-password', async (req, res) => {
   try {
-    const userData = await Users.findById(req.userId);
-    if (userData) {
-      res.json({ message: 'User data retrieved successfully', data: userData });
-    } else {
-      res.status(404).json({ message: 'User data not found' });
+    const { email } = req.body;
+
+    // Check if email exists in your user database
+    const user = await Users.findOne({ email });
+
+    if (!user) {
+      // Informative error message for not found email
+      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
     }
-  } catch (error) {
-    // Handle errors
-    console.error('Error retrieving user data:', error);
-    res.status(500).json({ message: 'Server error' });
+
+    // Use Firebase to send the password reset email
+    await sendPasswordReset(email); 
+
+    // Send success response
+    console.log(`Password reset link sent to ${email}`);
+    res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
+    } catch (error) {
+    console.error('Error sending reset link:', error);
+    res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); 
   }
 });
+
+
+
+
+// ***************************
+
 
 export default router;
