@@ -225,32 +225,32 @@ router.post('/send-otp', async (req, res) => {
     // Generate token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    // // Configure transporter
-    // const transporter = nodemailer.createTransport({
-    //   service: 'gmail',
-    //   auth: {
-    //     user: process.env.EMAIL_USER,
-    //     pass: process.env.EMAIL_PASS
-    //   }
-    // });
+    // Configure transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
 
-    // // Mail options
-    // const mailOptions = {
-    //   from: process.env.EMAIL_USER,
-    //   to: email,
-    //   subject: 'Reset Password Link',
-    //   text: `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`
-    // };
+    // Mail options
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Reset Password Link',
+      text: `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`
+    };
 
-    // // Send mail
-    // transporter.sendMail(mailOptions, function (error, info) {
-    //   if (error) {
-    //     console.log(error);
-    //     return res.status(500).json({ message: 'Error sending email' });
-    //   } else {
-    //     return res.status(200).json({ message: 'Reset link sent successfully' });
-    //   }
-    // });
+    // Send mail
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error sending email' });
+      } else {
+        return res.status(200).json({ message: 'Reset link sent successfully' });
+      }
+    });
 
     // Send an email:
     const client = new postmark.ServerClient("b9c1e925-1d9b-4be0-a3e7-78fd021e1ef0");
