@@ -5,8 +5,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-import { sendPasswordReset } from '../middlewares/firebase.js';
+// import { sendPasswordReset } from '../middlewares/firebase.js';
 import nodemailer from 'nodemailer';
+import postmark from 'postmark';
+
 
 const router = Router();
 
@@ -223,34 +225,47 @@ router.post('/send-otp', async (req, res) => {
     // Generate token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    // Configure transporter
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
+    // // Configure transporter
+    // const transporter = nodemailer.createTransport({
+    //   service: 'gmail',
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS
+    //   }
+    // });
+
+    // // Mail options
+    // const mailOptions = {
+    //   from: process.env.EMAIL_USER,
+    //   to: email,
+    //   subject: 'Reset Password Link',
+    //   text: `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`
+    // };
+
+    // // Send mail
+    // transporter.sendMail(mailOptions, function (error, info) {
+    //   if (error) {
+    //     console.log(error);
+    //     return res.status(500).json({ message: 'Error sending email' });
+    //   } else {
+    //     return res.status(200).json({ message: 'Reset link sent successfully' });
+    //   }
+    // });
+
+    // Send an email:
+    const client = new postmark.ServerClient("b9c1e925-1d9b-4be0-a3e7-78fd021e1ef0");
+
+    client.sendEmail({
+      "From": process.env.EMAIL_USER,
+      "To": email,
+      "Subject": "Reset Link",
+      "HtmlBody": "<strong>Hello</strong> user.",
+      "TextBody": `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`,
+      "MessageStream": "outbound"
     });
 
-    // Mail options
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Reset Password Link',
-      text: `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`
-    };
-
-    // Send mail
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Error sending email' });
-      } else {
-        return res.status(200).json({ message: 'Reset link sent successfully' });
-      }
-    });
   } catch (error) {
-    console.error('Error sending OTP:', error);
+    console.error('Error sending link:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -345,32 +360,29 @@ router.post('/verify-otp', async (req, res) => {
 
 // Endpoint for forgot password with improved error handling and validation
 
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
+// router.post('/forgot-password', async (req, res) => {
+//   try {
+//     const { email } = req.body;
 
-    // Check if email exists in your user database
-    const user = await Users.findOne({ email });
+//     // Check if email exists in your user database
+//     const user = await Users.findOne({ email });
 
-    if (!user) {
-      // Informative error message for not found email
-      return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
-    }
+//     if (!user) {
+//       // Informative error message for not found email
+//       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
+//     }
 
-    // Use Firebase to send the password reset email
-    await sendPasswordReset(email); 
+//     // Use Firebase to send the password reset email
+//     await sendPasswordReset(email); 
 
-    // Send success response
-    console.log(`Password reset link sent to ${email}`);
-    res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
-    } catch (error) {
-    console.error('Error sending reset link:', error);
-    res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); 
-  }
-});
-
-
-
+//     // Send success response
+//     console.log(`Password reset link sent to ${email}`);
+//     res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
+//     } catch (error) {
+//     console.error('Error sending reset link:', error);
+//     res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); 
+//   }
+// });
 
 // ***************************
 
