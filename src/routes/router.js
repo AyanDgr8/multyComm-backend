@@ -207,9 +207,6 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 
 
-
-
-
 // Endpoint for sending OTP
 router.post('/send-otp', async (req, res) => {
   try {
@@ -224,7 +221,7 @@ router.post('/send-otp', async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     // Configure transporter
     const transporter = nodemailer.createTransport({
@@ -240,7 +237,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `https://multycomm.netlify.app/${user._id}/${token}`
+      text: `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`
     };
 
     // Send mail
@@ -249,7 +246,7 @@ router.post('/send-otp', async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: 'Error sending email' });
       } else {
-        return res.status(200).json({ message: 'OTP sent successfully' });
+        return res.status(200).json({ message: 'Reset link sent successfully' });
       }
     });
   } catch (error) {
