@@ -7,7 +7,7 @@ import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 // import { sendPasswordReset } from '../middlewares/firebase.js';
 import nodemailer from 'nodemailer';
-import postmark from 'postmark';
+// import postmark from 'postmark';
 
 
 const router = Router();
@@ -252,17 +252,17 @@ router.post('/send-otp', async (req, res) => {
       }
     });
 
-    // Send an email:
-    const client = new postmark.ServerClient("b9c1e925-1d9b-4be0-a3e7-78fd021e1ef0");
+    // // Send an email:
+    // const client = new postmark.ServerClient("b9c1e925-1d9b-4be0-a3e7-78fd021e1ef0");
 
-    client.sendEmail({
-      "From": process.env.EMAIL_USER,
-      "To": email,
-      "Subject": "Reset Link",
-      "HtmlBody": "<strong>Hello</strong> user.",
-      "TextBody": `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`,
-      "MessageStream": "outbound"
-    });
+    // client.sendEmail({
+    //   "From": process.env.EMAIL_USER,
+    //   "To": email,
+    //   "Subject": "Reset Link",
+    //   "HtmlBody": "<strong>Hello</strong> user.",
+    //   "TextBody": `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`,
+    //   "MessageStream": "outbound"
+    // });
 
   } catch (error) {
     console.error('Error sending link:', error);
