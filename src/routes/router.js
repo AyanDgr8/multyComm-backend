@@ -85,13 +85,13 @@ router.post('/user-register', async (req, res) => {
     if (existingUser) {
       let message = '';
       if(existingUser.username === username){
-        message = 'Username is already in use';
+        message = 'Username already exists';
       } 
       else if (existingUser.email === email) {
-        message = 'Email is already in use';
+        message = 'Email already exists';
       } 
       else  {
-        message = 'Phone number is already in use';
+        message = 'Phone number already exists';
       } 
       return res.status(400).json({ message });
     }
@@ -146,14 +146,14 @@ router.post('/user-login', async (req, res) => {
     const user = await Users.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] }); 
 
     if (!user) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ message: 'Invalid username or email. Please check your credentials and try again.' });
     }
 
     // Compare the provided password with the stored hash
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ message: 'Incorrect password' });
     }
 
     // Create a JWT token and refresh token for the authenticated user
@@ -239,7 +239,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`
+      text: `Click on the following link to reset your password: http://localhost:3000/${ user._id }/${ token }`
     };
 
     // Send mail
@@ -318,41 +318,41 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
 
 // ***********
 
-// Endpoint for verifying OTP
-router.post('/verify-otp', async (req, res) => {
-  try {
-    const { email, otp, newPassword } = req.body;
+// // Endpoint for verifying OTP
+// router.post('/verify-otp', async (req, res) => {
+//   try {
+//     const { email, otp, newPassword } = req.body;
 
-    // Check if email exists
-    const user = await Users.findOne({ email });
+//     // Check if email exists
+//     const user = await Users.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
 
-    // Check if OTP matches
-    if (user.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP' });
-    }
+//     // Check if OTP matches
+//     if (user.otp !== otp) {
+//       return res.status(400).json({ message: 'Invalid OTP' });
+//     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+//     // Hash the new password
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update the user's password and clear the OTP
-    user.password = hashedPassword;
-    user.otp = '';
-    await user.save();
+//     // Update the user's password and clear the OTP
+//     user.password = hashedPassword;
+//     user.otp = '';
+//     await user.save();
 
-    // Generate new tokens
-    // const accessToken = generateAccessToken(user._id, user.email);
-    // const refreshToken = generateRefreshToken();
+//     // Generate new tokens
+//     // const accessToken = generateAccessToken(user._id, user.email);
+//     // const refreshToken = generateRefreshToken();
 
-    res.status(200).json({ accessToken, refreshToken, userId: user._id, message: 'Password reset successfully' });
-  } catch (error) {
-    console.error('Error verifying OTP:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+//     res.status(200).json({ accessToken, refreshToken, userId: user._id, message: 'Password reset successfully' });
+//   } catch (error) {
+//     console.error('Error verifying OTP:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 
 
 
