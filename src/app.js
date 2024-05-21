@@ -11,7 +11,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-    origin: 'http://localhost:3000', // Change this to the origin of your frontend
+    origin: 'https://multycomm.netlify.app/', // Change this to the origin of your frontend
     optionsSuccessStatus: 200,
     credentials: true, // Allow credentials
   };
