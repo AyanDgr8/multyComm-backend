@@ -212,6 +212,61 @@ router.get('/user-data', authMiddleware, async (req, res) => {
 
 // ******************************
 
+router.post('/create-user', async (req, res) => {
+  try {
+    const { username, password, firstName, lastName, phone, email, dob, gender } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const dobInIST = moment(dob).tz('Asia/Kolkata').toDate();
+
+    const newUser = new Users({
+      username,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      phone,
+      email,
+      dob: dobInIST,
+      gender,
+      passwordUpdatedAt: null // or you can set a default value if needed
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: 'User created successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating user', error: error.message });
+  }
+});
+
+
+// ***************************
+
+
+router.get('/user/:id', async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const createdAtIST = moment(user.createdAt).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+    const updatedAtIST = moment(user.updatedAt).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+    const passwordUpdatedAtIST = user.passwordUpdatedAt ? moment(user.passwordUpdatedAt).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss') : null;
+
+    res.json({
+      ...user.toObject(),
+      createdAt: createdAtIST,
+      updatedAt: updatedAtIST,
+      passwordUpdatedAt: passwordUpdatedAtIST
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+// ***************************
 
 
 // Endpoint for sending OTP
@@ -280,26 +335,26 @@ router.post('/send-otp', async (req, res) => {
 
 
 // Endpoint for resetting password through Firebase
-
 router.post('/reset-password/:id/:token', (req, res) => {
-  const { id, token } = req.params
-  const { newPassword } = req.body
+  const { id, token } = req.params;
+  const { newPassword } = req.body;
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if(err) {
-        return res.json({Status: "Error with token"})
-      } else {
-          bcrypt.hash(newPassword, 10)
-          .then(hash => {
-            const passwordUpdatedAt = moment().tz('Asia/Kolkata').toDate();
-            Users.findByIdAndUpdate(id, { password: hash, passwordUpdatedAt })
-              .then(() => res.json({ Status: 'Success' }))
-              .catch(err => res.json({ Status: err.message }));
-          })
-          .catch(err => res.json({ Status: err.message }));
-      }
-    });
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.json({ Status: "Error with token" });
+    } else {
+      bcrypt.hash(newPassword, 10)
+        .then(hash => {
+          const passwordUpdatedAt = moment().tz('Asia/Kolkata').toDate();
+          Users.findByIdAndUpdate(id, { password: hash, passwordUpdatedAt })
+            .then(() => res.json({ Status: 'Success' }))
+            .catch(err => res.json({ Status: err.message }));
+        })
+        .catch(err => res.json({ Status: err.message }));
+    }
   });
+});
+
 
 // ***************************
 
