@@ -49,11 +49,17 @@ userSchema.pre('save', function(next) {
     next();
 });
 
-// Middleware to update the timestamp in IST on updates
+
+// Middleware to update timestamps in IST on updates
 userSchema.pre('findOneAndUpdate', function(next) {
-    this._update.updatedAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    this._update.updatedAt = now;
+    if (!this._update.createdAt) {
+        this._update.createdAt = now;
+    }
     next();
 });
+
 
 const Users = mongoose.model('Users', userSchema);
 
