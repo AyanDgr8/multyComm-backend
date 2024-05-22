@@ -9,7 +9,7 @@ import { errorHandler, notFoundHandler } from './middlewares/errorHandling.js';
 const app = express();
 
 // CORS configuration
-const allowedOrigins = ['https://multycomm.netlify.app'];
+const allowedOrigins = ['https://multycomm.netlify.app', 'http://localhost:3000'];
 
 const corsOptions = {
   origin: function (origin, callback) {

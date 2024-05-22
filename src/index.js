@@ -18,18 +18,18 @@ const server = app.listen(process.env.PORT, () => {
 
 process.title = 'MultyComm Form';
 
-// const gracefulShutdown = async () => {
-//   console.log('📢 Received shutdown signal, closing server and database connections...'.yellow.bold);
+const gracefulShutdown = async () => {
+  console.log('📢 Received shutdown signal, closing server and database connections...'.yellow.bold);
 
-//   await mongoose.disconnect();
-//   server.close(() => {
-//     console.log('💤 Server and database connections closed successfully.'.blue.bold);
-//     process.exit(0);
-//   });
-// };
+  await mongoose.disconnect();
+  server.close(() => {
+    console.log('💤 Server and database connections closed successfully.'.blue.bold);
+    process.exit(0);
+  });
+};
 
-// process.on('SIGTERM', gracefulShutdown);
-// process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
 
 connectDB()
   .then(() => {
