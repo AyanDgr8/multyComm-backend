@@ -58,23 +58,6 @@ const updateUserPassword = async (email, newPassword) => {
 };
 
 
-
-// // Setup nodemailer transporter
-// const transporter = nodemailer.createTransport({
-//   service: 'Gmail', 
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
-
-// // Generate OTP
-// const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-
-
-
-
 // ***************************
 
 // Endpoint for registration
@@ -101,7 +84,7 @@ router.post('/user-register', async (req, res) => {
 
     // Hash the password before saving it
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    
     const newUser = new Users({
       username,
       password: hashedPassword,
@@ -173,9 +156,7 @@ router.post('/user-login', async (req, res) => {
 
 
 
-
 // ***************************
-
 
 
 
@@ -195,7 +176,7 @@ router.get('/user-data', authMiddleware, async (req, res) => {
     }
 
     // Convert passwordUpdatedAt to IST
-    const passwordUpdatedAtIST = moment(user.passwordUpdatedAt).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    const passwordUpdatedAtIST = user.passwordUpdatedAt ? moment(user.passwordUpdatedAt).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ss.SSSZ') : null;
 
     // If user found, return the user data
     res.status(200).json({ ...user.toObject(), passwordUpdatedAt: passwordUpdatedAtIST });
@@ -217,7 +198,6 @@ router.post('/create-user', async (req, res) => {
     const { username, password, firstName, lastName, phone, email, dob, gender } = req.body;
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    const dobInIST = moment(dob).tz('Asia/Kolkata').toDate();
 
     const newUser = new Users({
       username,
@@ -226,9 +206,9 @@ router.post('/create-user', async (req, res) => {
       lastName,
       phone,
       email,
-      dob: dobInIST,
+      dob,
       gender,
-      passwordUpdatedAt: null // or you can set a default value if needed
+      passwordUpdatedAt: null 
     });
 
     await newUser.save();
@@ -375,76 +355,6 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-// ***********
-
-// // Endpoint for verifying OTP
-// router.post('/verify-otp', async (req, res) => {
-//   try {
-//     const { email, otp, newPassword } = req.body;
-
-//     // Check if email exists
-//     const user = await Users.findOne({ email });
-
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
-
-//     // Check if OTP matches
-//     if (user.otp !== otp) {
-//       return res.status(400).json({ message: 'Invalid OTP' });
-//     }
-
-//     // Hash the new password
-//     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-//     // Update the user's password and clear the OTP
-//     user.password = hashedPassword;
-//     user.otp = '';
-//     await user.save();
-
-//     // Generate new tokens
-//     // const accessToken = generateAccessToken(user._id, user.email);
-//     // const refreshToken = generateRefreshToken();
-
-//     res.status(200).json({ accessToken, refreshToken, userId: user._id, message: 'Password reset successfully' });
-//   } catch (error) {
-//     console.error('Error verifying OTP:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// });
-
-
-
-// ***************************
-
-// Endpoint for forgot password with improved error handling and validation
-
-// router.post('/forgot-password', async (req, res) => {
-//   try {
-//     const { email } = req.body;
-
-//     // Check if email exists in your user database
-//     const user = await Users.findOne({ email });
-
-//     if (!user) {
-//       // Informative error message for not found email
-//       return res.status(400).json({ message: 'The email address you entered is not associated with an account.' });
-//     }
-
-//     // Use Firebase to send the password reset email
-//     await sendPasswordReset(email); 
-
-//     // Send success response
-//     console.log(`Password reset link sent to ${email}`);
-//     res.status(200).json({ exists: true, message: 'Reset link sent successfully' });
-//     } catch (error) {
-//     console.error('Error sending reset link:', error);
-//     res.status(500).json({ message: 'An error occurred while processing your request. Please try again later.' }); 
-//   }
-// });
-
-// ***************************
 
 
 export default router;
