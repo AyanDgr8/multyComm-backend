@@ -43,9 +43,8 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', function(next) {
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     this.updatedAt = now;
-    if (!this.createdAt) {
-        this.createdAt = now;
-    }
+    this.createdAt = now;
+    
     next();
 });
 
