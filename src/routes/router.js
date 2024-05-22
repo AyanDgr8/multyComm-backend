@@ -230,9 +230,11 @@ router.get('/user/:id', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const createdAtIST = moment(user.createdAt).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-    const updatedAtIST = moment(user.updatedAt).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-    const passwordUpdatedAtIST = user.passwordUpdatedAt ? moment(user.passwordUpdatedAt).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss') : null;
+    const createdAtIST = new Date(user.createdAt.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const updatedAtIST = new Date(user.updatedAt.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const passwordUpdatedAtIST = user.passwordUpdatedAt 
+      ? new Date(user.passwordUpdatedAt.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })) 
+      : null;
 
     res.json({
       ...user.toObject(),
