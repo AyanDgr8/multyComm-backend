@@ -38,7 +38,7 @@ const updateUserPassword = async (email, newPassword) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Get the current time in IST
-    const passwordUpdatedAt = moment().tz('Asia/Kolkata').format();
+    const passwordUpdatedAt = moment().tz('Asia/Kolkata').toDate();
 
     // Find the user by email and update the password and passwordUpdatedAt
     const updatedUser = await Users.findOneAndUpdate(
@@ -194,8 +194,11 @@ router.get('/user-data', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Convert passwordUpdatedAt to IST
+    const passwordUpdatedAtIST = moment(user.passwordUpdatedAt).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
     // If user found, return the user data
-    res.status(200).json(user);
+    res.status(200).json({ ...user.toObject(), passwordUpdatedAt: passwordUpdatedAtIST });
   } catch (error) {
     // Handle errors
     console.error('Error fetching user data:', error);
@@ -284,11 +287,11 @@ router.post('/reset-password/:id/:token', (req, res) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if(err) {
-          return res.json({Status: "Error with token"})
+        return res.json({Status: "Error with token"})
       } else {
           bcrypt.hash(newPassword, 10)
           .then(hash => {
-            const passwordUpdatedAt = moment().tz('Asia/Kolkata').format();
+            const passwordUpdatedAt = moment().tz('Asia/Kolkata').toDate();
             Users.findByIdAndUpdate(id, { password: hash, passwordUpdatedAt })
               .then(() => res.json({ Status: 'Success' }))
               .catch(err => res.json({ Status: err.message }));
