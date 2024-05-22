@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
-// import { sendPasswordReset } from '../middlewares/firebase.js';
 import nodemailer from 'nodemailer';
 import moment from 'moment-timezone';
 
@@ -30,15 +29,16 @@ const generateRefreshToken = () => {
 };
 
 
+// *******************
 
-/// Function to update user's password in the database
+// Function to update user's password in the database
 const updateUserPassword = async (email, newPassword) => {
   try {
     // Hash the new password before saving it to the database
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Get the current time in IST
-    const passwordUpdatedAt = moment().tz('Asia/Kolkata').toDate();
+    // Get the current time in IST as a Date object
+    const passwordUpdatedAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
 
     // Find the user by email and update the password and passwordUpdatedAt
     const updatedUser = await Users.findOneAndUpdate(
@@ -263,7 +263,7 @@ router.post('/send-otp', async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
 
     // Configure transporter
     const transporter = nodemailer.createTransport({
@@ -292,18 +292,6 @@ router.post('/send-otp', async (req, res) => {
       }
     });
 
-    // // Send an email:
-    // const client = new postmark.ServerClient("b9c1e925-1d9b-4be0-a3e7-78fd021e1ef0");
-
-    // client.sendEmail({
-    //   "From": process.env.EMAIL_USER,
-    //   "To": email,
-    //   "Subject": "Reset Link",
-    //   "HtmlBody": "<strong>Hello</strong> user.",
-    //   "TextBody": `Click on the following link to reset your password: https://multycomm.netlify.app/${user._id}/${token}`,
-    //   "MessageStream": "outbound"
-    // });
-
   } catch (error) {
     console.error('Error sending link:', error);
     res.status(500).json({ message: 'Server error' });
@@ -325,7 +313,7 @@ router.post('/reset-password/:id/:token', (req, res) => {
     } else {
       bcrypt.hash(newPassword, 10)
         .then(hash => {
-          const passwordUpdatedAt = moment().tz('Asia/Kolkata').toDate();
+          const passwordUpdatedAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
           Users.findByIdAndUpdate(id, { password: hash, passwordUpdatedAt })
             .then(() => res.json({ Status: 'Success' }))
             .catch(err => res.json({ Status: err.message }));
