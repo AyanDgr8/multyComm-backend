@@ -54,9 +54,7 @@ userSchema.pre('save', function(next) {
 userSchema.pre('findOneAndUpdate', function(next) {
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     this._update.updatedAt = now;
-    if (!this._update.createdAt) {
-        this._update.createdAt = now;
-    }
+    this._update.createdAt = now;
     next();
 });
 
