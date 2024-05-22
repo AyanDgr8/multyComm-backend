@@ -31,16 +31,22 @@ const generateRefreshToken = () => {
 
 
 
+
 // Function to update user's password in the database
 const updateUserPassword = async (email, newPassword) => {
   try {
     // Hash the new password before saving it to the database
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Find the user by email and update the password
+    // Find the user by email and update the password and passwordUpdatedAt fields
     const updatedUser = await Users.findOneAndUpdate(
       { email },
-      { $set: { password: hashedPassword } },
+      { 
+        $set: { 
+          password: hashedPassword,
+          passwordUpdatedAt: new Date(), // Set the passwordUpdatedAt field to the current date and time
+        } 
+      },
       { new: true } // Return the updated user document
     );
 
@@ -56,17 +62,17 @@ const updateUserPassword = async (email, newPassword) => {
 
 
 
-// Setup nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: 'Gmail', 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// // Setup nodemailer transporter
+// const transporter = nodemailer.createTransport({
+//   service: 'Gmail', 
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
 
-// Generate OTP
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+// // Generate OTP
+// const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 
 
@@ -180,7 +186,6 @@ router.post('/user-login', async (req, res) => {
 router.get('/user-data', authMiddleware, async (req, res) => {
   try {
 
-
     // The user ID is already attached to the request object by the authMiddleware
     const userId = req.userId;
 
@@ -286,7 +291,10 @@ router.post('/reset-password/:id/:token', (req, res) => {
       } else {
           bcrypt.hash(newPassword, 10)
           .then(hash => {
-            Users.findByIdAndUpdate(id, {password: hash})
+            Users.findByIdAndUpdate(id, {
+              password: hash,
+              passwordUpdatedAt: new Date()
+              })
             .then(() => res.json({ Status: 'Success' }))
             .catch(err => res.json({ Status: err.message }));
           })

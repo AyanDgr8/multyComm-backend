@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema(
         gender: {
             type: String,
         },
+        passwordUpdatedAt: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps:true
