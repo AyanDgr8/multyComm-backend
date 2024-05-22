@@ -7,7 +7,7 @@ import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 // import { sendPasswordReset } from '../middlewares/firebase.js';
 import nodemailer from 'nodemailer';
-// import postmark from 'postmark';
+import moment from 'moment-timezone';
 
 
 const router = Router();
@@ -31,22 +31,19 @@ const generateRefreshToken = () => {
 
 
 
-
-// Function to update user's password in the database
+/// Function to update user's password in the database
 const updateUserPassword = async (email, newPassword) => {
   try {
     // Hash the new password before saving it to the database
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Find the user by email and update the password and passwordUpdatedAt fields
+    // Get the current time in IST
+    const passwordUpdatedAt = moment().tz('Asia/Kolkata').format();
+
+    // Find the user by email and update the password and passwordUpdatedAt
     const updatedUser = await Users.findOneAndUpdate(
       { email },
-      { 
-        $set: { 
-          password: hashedPassword,
-          passwordUpdatedAt: new Date(), // Set the passwordUpdatedAt field to the current date and time
-        } 
-      },
+      { $set: { password: hashedPassword, passwordUpdatedAt } },
       { new: true } // Return the updated user document
     );
 
@@ -291,18 +288,15 @@ router.post('/reset-password/:id/:token', (req, res) => {
       } else {
           bcrypt.hash(newPassword, 10)
           .then(hash => {
-            Users.findByIdAndUpdate(id, {
-              password: hash,
-              passwordUpdatedAt: new Date()
-              })
-            .then(() => res.json({ Status: 'Success' }))
-            .catch(err => res.json({ Status: err.message }));
+            const passwordUpdatedAt = moment().tz('Asia/Kolkata').format();
+            Users.findByIdAndUpdate(id, { password: hash, passwordUpdatedAt })
+              .then(() => res.json({ Status: 'Success' }))
+              .catch(err => res.json({ Status: err.message }));
           })
           .catch(err => res.json({ Status: err.message }));
       }
-  })
-})
-
+    });
+  });
 
 // ***************************
 
