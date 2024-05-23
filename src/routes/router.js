@@ -7,6 +7,8 @@ import { authMiddleware } from '../middlewares/auth.js';
 import { Users } from '../models/users.js';
 import nodemailer from 'nodemailer';
 import moment from 'moment-timezone';
+// ****************
+import { validatePanV1, validatePanV2 } from '../services/kycService';
 
 
 const router = Router();
@@ -26,35 +28,6 @@ const generateAccessToken = (userId, email) => {
 // To generate refresh token
 const generateRefreshToken = () => {
   return jwt.sign({}, REFRESH_TOKEN_SECRET, { expiresIn: '24h' }); // Refresh token expires in 24 hours
-};
-
-
-// *******************
-
-// Function to update user's password in the database
-const updateUserPassword = async (email, newPassword) => {
-  try {
-    // Hash the new password before saving it to the database
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Get the current time in IST as a Date object
-    const passwordUpdatedAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-
-    // Find the user by email and update the password and passwordUpdatedAt
-    const updatedUser = await Users.findOneAndUpdate(
-      { email },
-      { $set: { password: hashedPassword, passwordUpdatedAt } },
-      { new: true } // Return the updated user document
-    );
-
-    if (!updatedUser) {
-      throw new Error('User not found');
-    }
-
-    return updatedUser;
-  } catch (error) {
-    throw new Error(`Error updating user password: ${error.message}`);
-  }
 };
 
 
