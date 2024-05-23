@@ -8,7 +8,7 @@ import { Users } from '../models/users.js';
 import nodemailer from 'nodemailer';
 import moment from 'moment-timezone';
 // ****************
-import { validatePanV1, validatePanV2 } from '../services/kycService';
+import { validatePanV1, validatePanV2 } from '../services/kycService.js';
 
 
 const router = Router();
@@ -318,6 +318,29 @@ router.get('/protected-route', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// *****************************
+
+// *****************************
+
+router.post('/verify-pan', async (req, res) => {
+    const { idType, idNumber, name, dob } = req.body;
+    const clientRefNum = 'unique_ref_number'; // Generate a unique reference number for each request
+
+    try {
+        let response;
+        if (idType === 'PAN (V2)') {
+            response = await validatePanV2(clientRefNum, idNumber, name, dob);
+        } else {
+            response = await validatePanV1(clientRefNum, idNumber, name);
+        }
+        res.status(200).json(response);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Verification failed', error });
+    }
+});
+
 
 
 export default router;
