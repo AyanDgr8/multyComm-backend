@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false, 
         },
-        lastLogin: {
+        lastLoginAt: {
             type: Date,
             default: null,
         },
@@ -79,10 +79,6 @@ userSchema.pre('findOneAndUpdate', function(next) {
     next();
 });
 
-// Middleware to update lastLogin timestamp on user login
-userSchema.methods.updateLastLogin = function() {
-    this.lastLogin = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-};
 
 
 const Users = mongoose.model('Users', userSchema);

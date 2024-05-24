@@ -114,6 +114,10 @@ router.post('/user-login', async (req, res) => {
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken();
 
+    // Update the lastLoginAt field
+    user.lastLoginAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    await user.save();
+
     res.status(200).json({ accessToken, refreshToken, userId: user._id });
   } catch (error) {
     // Handle errors
@@ -162,8 +166,11 @@ router.get('/user-data', authMiddleware, async (req, res) => {
     // Convert passwordUpdatedAt to IST
     const passwordUpdatedAtIST = user.passwordUpdatedAt ? moment(user.passwordUpdatedAt).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ss.SSSZ') : null;
 
+    // // Convert lastLoginAtIST to IST
+    // const lastLoginAtIST = user.lastLoginAt ? moment(user.lastLoginAt).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ss.SSSZ') : null;
+
     // If user found, return the user data
-    res.status(200).json({ ...user.toObject(), passwordUpdatedAt: passwordUpdatedAtIST });
+    res.status(200).json({ ...user.toObject(), passwordUpdatedAt: passwordUpdatedAtIST, lastLoginAt: lastLoginAtIST });
   } catch (error) {
     // Handle errors
     console.error('Error fetching user data:', error);
@@ -188,7 +195,8 @@ router.post('/create-user', async (req, res) => {
       email,
       dob,
       gender,
-      passwordUpdatedAt: null 
+      passwordUpdatedAt: null,
+      lastLoginAt: null,
     });
 
     await newUser.save();
@@ -213,12 +221,16 @@ router.get('/user/:id', async (req, res) => {
     const passwordUpdatedAtIST = user.passwordUpdatedAt 
       ? new Date(user.passwordUpdatedAt.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })) 
       : null;
+    const lastLoginAtIST = user.lastLoginAt
+      ? new Date(user.lastLoginAt.toLocaleString('en-Us', { timeZone: 'Asia/Kolkata' }))
+      : null;
 
     res.json({
       ...user.toObject(),
       createdAt: createdAtIST,
       updatedAt: updatedAtIST,
-      passwordUpdatedAt: passwordUpdatedAtIST
+      passwordUpdatedAt: passwordUpdatedAtIST,
+      lastLoginAt: lastLoginAtIST
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
