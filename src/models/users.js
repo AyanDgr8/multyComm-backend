@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema(
         lastName: { 
             type: String, 
         },
+        gender: {
+            type: String,
+        },
         phone: { 
             type: Number, 
         },
@@ -26,9 +29,6 @@ const userSchema = new mongoose.Schema(
         dob: {
             type: Date,
         },
-        gender: {
-            type: String,
-        },
         passwordUpdatedAt: {
             type: Date,
             default: null,
@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
         isAdult: {
             type: Boolean,
             default: false, 
+        },
+        lastLogin: {
+            type: Date,
+            default: null,
         },
     },
     {
@@ -74,6 +78,11 @@ userSchema.pre('findOneAndUpdate', function(next) {
     this._update.createdAt = now;
     next();
 });
+
+// Middleware to update lastLogin timestamp on user login
+userSchema.methods.updateLastLogin = function() {
+    this.lastLogin = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+};
 
 
 const Users = mongoose.model('Users', userSchema);
