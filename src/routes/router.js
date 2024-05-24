@@ -260,7 +260,7 @@ router.post('/send-otp', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Reset Password Link',
-      text: `Click on the following link to reset your password: https://multycomm.netlify.app/reset-password/${ user._id }/${ token }`
+      text: `Click on the following link to reset your password: https://gamehigame.netlify.app/reset-password/${ user._id }/${ token }`
     };
 
     // Send mail
