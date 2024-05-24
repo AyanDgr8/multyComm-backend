@@ -8,11 +8,10 @@ import { Users } from '../models/users.js';
 import nodemailer from 'nodemailer';
 import moment from 'moment-timezone';
 // ****************
-import { validatePanV1, validatePanV2 } from '../services/kycService.js';
+import { validatePanV1, validatePanV2, validateAadhaar } from '../services/kycService.js'; // Import the new service
 
 
 const router = Router();
-
 
 // Secret key for JWT signing
 const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret';
@@ -89,11 +88,7 @@ router.post('/user-register', async (req, res) => {
 });
 
 
-
-
 // ***************************
-
-
 
 
 // Endpoint for login
@@ -128,10 +123,26 @@ router.post('/user-login', async (req, res) => {
 });
 
 
-
+// ***************************
 // ***************************
 
+// JWT authorization
+router.get('/protected-route', authMiddleware, async (req, res) => {
+  try {
+    const userData = await Users.findById(req.userId);
+    if (userData) {
+      res.json({ message: 'User data retrieved successfully', data: userData });
+    } else {
+      res.status(404).json({ message: 'User data not found' });
+    }
+  } catch (error) {
+    // Handle errors
+    console.error('Error retrieving user data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
+// ***************************
 
 // Define the route to fetch user data
 router.get('/user-data', authMiddleware, async (req, res) => {
@@ -160,11 +171,7 @@ router.get('/user-data', authMiddleware, async (req, res) => {
   }
 });
 
-
-
-// ******************************
-
-// ******************************
+// ***************************
 
 router.post('/create-user', async (req, res) => {
   try {
@@ -191,9 +198,7 @@ router.post('/create-user', async (req, res) => {
   }
 });
 
-
 // ***************************
-
 
 router.get('/user/:id', async (req, res) => {
   try {
@@ -221,6 +226,7 @@ router.get('/user/:id', async (req, res) => {
 });
 
 
+// ***************************
 // ***************************
 
 
@@ -273,9 +279,7 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-
-// ******************
-
+// ***************************
 
 // Endpoint for resetting password through Firebase
 router.post('/reset-password/:id/:token', (req, res) => {
@@ -299,46 +303,54 @@ router.post('/reset-password/:id/:token', (req, res) => {
 });
 
 
-// ***************************
 
+// *****************************
+// CHAMPIONSHIP
+// *****************************
 
-
-// JWT authorization
-router.get('/protected-route', authMiddleware, async (req, res) => {
+router.post('/verify-pan', authMiddleware, async (req, res) => {
+  const { idType, idNumber, name, dob, clientRefNum } = req.body;
+  
   try {
-    const userData = await Users.findById(req.userId);
-    if (userData) {
-      res.json({ message: 'User data retrieved successfully', data: userData });
-    } else {
-      res.status(404).json({ message: 'User data not found' });
+    let result;
+    if (idType === 'PAN (V1)') {
+      result = await validatePanV1(clientRefNum, idNumber, name);
+    } else if (idType === 'PAN (V2)') {
+      result = await validatePanV2(clientRefNum, idNumber, name, dob);
     }
+    res.json(result);
   } catch (error) {
-    // Handle errors
-    console.error('Error retrieving user data:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error verifying PAN:', error);
+    res.status(500).json({ error: 'Error verifying PAN' });
   }
 });
 
-// *****************************
+// Add the Aadhaar verification endpoint
+router.post('/verify-aadhaar', authMiddleware, async (req, res) => {
+  const { idNumber, clientRefNum } = req.body;
+  
+  try {
+    const result = await validateAadhaar(clientRefNum, idNumber);
+    res.json(result);
+  } catch (error) {
+    console.error('Error verifying Aadhaar:', error);
+    res.status(500).json({ error: 'Error verifying Aadhaar' });
+  }
+});
 
-// *****************************
+// Payment route
+router.post('/initiate-payment', authMiddleware, async (req, res) => {
+  const { amount } = req.body;
 
-router.post('/verify-pan', async (req, res) => {
-    const { idType, idNumber, name, dob } = req.body;
-    const clientRefNum = 'unique_ref_number'; // Generate a unique reference number for each request
+  try {
+    // Logic to initiate payment with Cashify
+    const paymentUrl = `https://cashify.com/pay?amount=${amount}&referenceId=unique_reference_id`; // Replace with actual Cashify payment URL
 
-    try {
-        let response;
-        if (idType === 'PAN (V2)') {
-            response = await validatePanV2(clientRefNum, idNumber, name, dob);
-        } else {
-            response = await validatePanV1(clientRefNum, idNumber, name);
-        }
-        res.status(200).json(response);
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Verification failed', error });
-    }
+    res.json({ paymentUrl });
+  } catch (error) {
+    console.error('Error initiating payment:', error);
+    res.status(500).json({ error: 'Error initiating payment' });
+  }
 });
 
 

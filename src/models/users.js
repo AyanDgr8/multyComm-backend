@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        isAdult: {
+            type: Boolean,
+            default: false, 
+        },
     },
     {
         timestamps: true
@@ -45,6 +49,20 @@ userSchema.pre('save', function(next) {
     this.updatedAt = now;
     this.createdAt = now;
     
+    // Calculate if user is an adult based on date of birth
+    if (this.dob) {
+        const dobDate = new Date(this.dob);
+        const today = new Date();
+        const age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+            this.isAdult = age - 1 >= 18; // Subtract 1 year if birthday hasn't occurred yet this year
+        } else {
+            this.isAdult = age >= 18;
+        }
+    }
+
     next();
 });
 
