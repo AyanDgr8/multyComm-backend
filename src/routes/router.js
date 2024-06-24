@@ -320,50 +320,50 @@ router.post('/reset-password/:id/:token', (req, res) => {
 // CHAMPIONSHIP
 // *****************************
 
-router.post('/verify-pan', authMiddleware, async (req, res) => {
-  const { idType, idNumber, name, dob, clientRefNum } = req.body;
+// router.post('/verify-pan', authMiddleware, async (req, res) => {
+//   const { idType, idNumber, name, dob, clientRefNum } = req.body;
   
-  try {
-    let result;
-    if (idType === 'PAN (V1)') {
-      result = await validatePanV1(clientRefNum, idNumber, name);
-    } else if (idType === 'PAN (V2)') {
-      result = await validatePanV2(clientRefNum, idNumber, name, dob);
-    }
-    res.json(result);
-  } catch (error) {
-    console.error('Error verifying PAN:', error);
-    res.status(500).json({ error: 'Error verifying PAN' });
-  }
-});
+//   try {
+//     let result;
+//     if (idType === 'PAN (V1)') {
+//       result = await validatePanV1(clientRefNum, idNumber, name);
+//     } else if (idType === 'PAN (V2)') {
+//       result = await validatePanV2(clientRefNum, idNumber, name, dob);
+//     }
+//     res.json(result);
+//   } catch (error) {
+//     console.error('Error verifying PAN:', error);
+//     res.status(500).json({ error: 'Error verifying PAN' });
+//   }
+// });
 
-// Add the Aadhaar verification endpoint
-router.post('/verify-aadhaar', authMiddleware, async (req, res) => {
-  const { idNumber, clientRefNum } = req.body;
+// // Add the Aadhaar verification endpoint
+// router.post('/verify-aadhaar', authMiddleware, async (req, res) => {
+//   const { idNumber, clientRefNum } = req.body;
   
-  try {
-    const result = await validateAadhaar(clientRefNum, idNumber);
-    res.json(result);
-  } catch (error) {
-    console.error('Error verifying Aadhaar:', error);
-    res.status(500).json({ error: 'Error verifying Aadhaar' });
-  }
-});
+//   try {
+//     const result = await validateAadhaar(clientRefNum, idNumber);
+//     res.json(result);
+//   } catch (error) {
+//     console.error('Error verifying Aadhaar:', error);
+//     res.status(500).json({ error: 'Error verifying Aadhaar' });
+//   }
+// });
 
-// Payment route
-router.post('/initiate-payment', authMiddleware, async (req, res) => {
-  const { amount } = req.body;
+// // Payment route
+// router.post('/initiate-payment', authMiddleware, async (req, res) => {
+//   const { amount } = req.body;
 
-  try {
-    // Logic to initiate payment with Cashify
-    const paymentUrl = `https://cashify.com/pay?amount=${amount}&referenceId=unique_reference_id`; // Replace with actual Cashify payment URL
+//   try {
+//     // Logic to initiate payment with Cashify
+//     const paymentUrl = `https://cashify.com/pay?amount=${amount}&referenceId=unique_reference_id`; // Replace with actual Cashify payment URL
 
-    res.json({ paymentUrl });
-  } catch (error) {
-    console.error('Error initiating payment:', error);
-    res.status(500).json({ error: 'Error initiating payment' });
-  }
-});
+//     res.json({ paymentUrl });
+//   } catch (error) {
+//     console.error('Error initiating payment:', error);
+//     res.status(500).json({ error: 'Error initiating payment' });
+//   }
+// });
 
 
 
